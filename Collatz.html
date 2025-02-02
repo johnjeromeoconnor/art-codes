@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Collatz Mood Sphere with Absurd Predictions & Cello Sound</title>
+  <style>
+    /* Basic styling */
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    /* The bottom bar displays the continuously updating Collatz sequence, weather info, and a prediction */
+    #collatzDisplay {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: black;
+      color: white;
+      font-family: monospace;
+      font-size: 1.2em;
+      padding: 10px;
+      box-sizing: border-box;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- This div displays the continuously updating Collatz sequence, weather info, and a prediction -->
+  <div id="collatzDisplay">7</div>
+
+  <!-- Include Three.js from a CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    /***********************
+     * Utility: typeOutText
+     * Types out the given text letter-by-letter into the provided element,
+     * with a specified delay between letters.
+     ***********************/
+    function typeOutText(text, element, speed) {
+      element.innerText = "";
+      let index = 0;
+      let interval = setInterval(() => {
+        element.innerText += text[index];
+        index++;
+        if (index >= text.length) {
+          clearInterval(interval);
+        }
+      }, speed);
+    }
+
+    /***********************
+     * Utility: makeTextSprite
+     * Creates a sprite displaying text (white text with a black outline).
+     ***********************/
+    function makeTextSprite(message, parameters) {
+      parameters = parameters || {};
+      var fontface = parameters.fontface || "Arial";
+      var fontsize = parameters.fontsize || 24;
+      var borderThickness = parameters.borderThickness || 2;
+      var canvas = document.createElement('canvas');
+      var context = canvas.getContext('2d');
+      context.font = fontsize + "px " + fontface;
+      var metrics = context.measureText(message);
+      var textWidth = metrics.width;
+      canvas.width = textWidth + borderThickness * 2;
+      canvas.height = fontsize * 1.2 + borderThickness * 2;
+      context.font = fontsize + "px " + fontface;
+      context.lineWidth = borderThickness;
+      context.strokeStyle = "black";
+      context.strokeText(message, borderThickness, fontsize + borderThickness);
+      context.fillStyle = "white";
+      context.fillText(message, borderThickness, fontsize + borderThickness);
+      var texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      var spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      var sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(0.5, 0.25, 1);
+      return sprite;
+    }
+
+    /***********************
+     * SIMPLEX NOISE IMPLEMENTATION
+     * (A minimal version by Stefan Gustavson, ported to JS)
+     ***********************/
+    var SimplexNoise = function(r) {
+      if (r == undefined) r = Math;
+      this.grad3 = [
+        [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
+        [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
+        [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
+      ];
+      this.p = [];
+      for (var i = 0; i < 256; i++) {
+        this.p[i] = Math.floor(r.random() * 256);
+      }
+      this.perm = [];
+      for (var i = 0; i < 512; i++) {
+        this.perm[i] = this.p[i & 255];
+      }
+    };
+
+    SimplexNoise.prototype.dot = function(g, x, y, z) { 
+      return g[0]*x + g[1]*y + g[2]*z; 
+    };
+
+    SimplexNoise.prototype.noise = function(xin, yin, zin) {
+      var F3 = 1/3, G3 = 1/6;
+      var s = (xin + yin + zin) * F3;
+      var i = Math.floor(xin + s);
+      var j = Math.floor(yin + s);
+      var k = Math.floor(zin + s);
+      var t = (i + j + k) * G3;
+      var X0 = i - t, Y0 = j - t, Z0 = k - t;
+      var x0 = xin - X0, y0 = yin - Y0, z0 = zin - Z0;
+      var i1, j1, k1, i2, j2, k2;
+      if (x0 >= y0) {
+        if (y0 >= z0) { i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0; }
+        else if (x0 >= z0) { i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1; }
+        else { i1 = 0; j1 = 0; k1 = 1; i2 = 1; j2 = 0; k2 = 1; }
+      } else {
+        if (y0 < z0) { i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1; }
+        else if (x0 < z0) { i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1; }
+        else { i1 = 0; j1 = 1; k1 = 0; i2 = 1; j2 = 1; k2 = 0; }
+      }
+      var x1 = x0 - i1 + G3, y1 = y0 - j1 + G3, z1 = z0 - k1 + G3;
+      var x2 = x0 - i2 + 2*G3, y2 = y0 - j2 + 2*G3, z2 = z0 - k2 + 2*G3;
+      var x3 = x0 - 1 + 3*G3, y3 = y0 - 1 + 3*G3, z3 = z0 - 1 + 3*G3;
+      var ii = i & 255, jj = j & 255, kk = k & 255;
+      var gi0 = this.perm[ii + this.perm[jj + this.perm[kk]]] % 12;
+      var gi1 = this.perm[ii + i1 + this.perm[jj + j1 + this.perm[kk + k1]]] % 12;
+      var gi2 = this.perm[ii + i2 + this.perm[jj + j2 + this.perm[kk + k2]]] % 12;
+      var gi3 = this.perm[ii + 1 + this.perm[jj + 1 + this.perm[kk + 1]]] % 12;
+      var t0 = 0.6 - x0*x0 - y0*y0 - z0*z0;
+      var n0 = t0 < 0 ? 0 : (t0 *= t0, t0 * t0 * this.dot(this.grad3[gi0], x0, y0, z0));
+      var t1 = 0.6 - x1*x1 - y1*y1 - z1*z1;
+      var n1 = t1 < 0 ? 0 : (t1 *= t1, t1 * t1 * this.dot(this.grad3[gi1], x1, y1, z1));
+      var t2 = 0.6 - x2*x2 - y2*y2 - z2*z2;
+      var n2 = t2 < 0 ? 0 : (t2 *= t2, t2 * t2 * this.dot(this.grad3[gi2], x2, y2, z2));
+      var t3 = 0.6 - x3*x3 - y3*y3 - z3*z3;
+      var n3 = t3 < 0 ? 0 : (t3 *= t3, t3 * t3 * this.dot(this.grad3[gi3], x3, y3, z3));
+      return 32*(n0 + n1 + n2 + n3);
+    };
+
+    // Create a simplex noise instance.
+    var simplex = new SimplexNoise();
+
+    /***********************
+     * SCENE, CAMERA, RENDERER SETUP
+     ***********************/
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    /***********************
+     * BACKGROUND COLOR SETUP
+     ***********************/
+    // Use full saturation for background.
+    let currentBgColor = new THREE.Color().setHSL(187/360, 1, 0.5);
+    let targetBgColor = currentBgColor.clone();
+    renderer.setClearColor(currentBgColor);
+
+    /***********************
+     * MAIN MORPHING FORM (Sphere BufferGeometry)
+     * Original vertex positions are stored for morphing.
+     ***********************/
+    const sphereGeometry = new THREE.SphereBufferGeometry(2, 64, 64);
+    const posAttr = sphereGeometry.attributes.position;
+    const originalPositions = posAttr.array.slice();
+    sphereGeometry.userData.originalPositions = originalPositions;
+    // The object’s target color uses the full spectrum.
+    const sphereMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.5,
+      metalness: 0.1
+    });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    scene.add(sphere);
+
+    /***********************
+     * LIGHTING
+     ***********************/
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 0.8);
+    pointLight.position.set(5,5,5);
+    scene.add(pointLight);
+
+    /***********************
+     * CAMERA POSITION
+     ***********************/
+    camera.position.z = 5;
+
+    /***********************
+     * WEATHER ICON SPRITE (Fake Weather)
+     ***********************/
+    const textureLoader = new THREE.TextureLoader();
+    const defaultIconURL = "https://openweathermap.org/img/wn/01d@2x.png";
+    let weatherTexture = textureLoader.load(defaultIconURL);
+    const spriteMaterial = new THREE.SpriteMaterial({ map: weatherTexture });
+    const weatherSprite = new THREE.Sprite(spriteMaterial);
+    weatherSprite.scale.set(1.5,1.5,1.5);
+    weatherSprite.position.set(-3,3,-2);
+    camera.add(weatherSprite);
+    scene.add(camera);
+
+    /***********************
+     * COLLATZ & COLOR VARIABLES
+     ***********************/
+    let collatzNumber = 7;
+    // Map collatzNumber to a hue over the full spectrum (multiply by 10).
+    let hue = (collatzNumber * 10) % 360;
+    let targetColor = new THREE.Color().setHSL(hue/360, 1, 0.5);
+    let markerTargetColor = new THREE.Color(); // Will be set based on odd/even.
+    // Slower rotation.
+    let rotationSpeed = new THREE.Vector3(0.0005, 0.0005, 0.0005);
+
+    /***********************
+     * ANGULAR FACTOR FOR MORPHING
+     * currentAngularFactor: 1 = fully angular, 0 = fully biomorphic.
+     ***********************/
+    let currentAngularFactor = 1;  // Start angular (7 is odd).
+    let targetAngularFactor = 1;
+
+    /***********************
+     * MARKERS (NODES) SETUP
+     * Desired count = collatzNumber * 3.
+     * Each marker gets a number label.
+     ***********************/
+    let markers = [];
+    let markerCounter = 1;
+    // Modified generateMarkerTarget: Now always generates points on the front hemisphere.
+    function generateMarkerTarget() {
+      const phi = Math.random() * (Math.PI/2); // 0 to π/2 for front hemisphere.
+      const theta = Math.random() * (2 * Math.PI);
+      const r = 2;
+      return new THREE.Vector3(
+        r * Math.sin(phi) * Math.cos(theta),
+        r * Math.sin(phi) * Math.sin(theta),
+        r * Math.cos(phi)
+      );
+    }
+    function addNewMarker() {
+      const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+      const markerMaterial = new THREE.MeshStandardMaterial({
+        color: markerTargetColor.clone(),
+        transparent: true,
+        opacity: 0
+      });
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.userData.target = generateMarkerTarget();
+      const targetSize = 0.3 + Math.random() * 0.7;
+      marker.userData.targetScale = new THREE.Vector3(targetSize, targetSize, targetSize);
+      marker.scale.set(0.1, 0.1, 0.1);
+      marker.userData.targetOpacity = 1;
+      marker.userData.dying = false;
+      
+      // Create and attach a label sprite.
+      var labelSprite = makeTextSprite(String(markerCounter), { fontsize: 32, borderThickness: 2, fontface: "Arial" });
+      labelSprite.position.set(0, marker.userData.targetScale.y * 0.75, 0);
+      marker.add(labelSprite);
+      marker.userData.labelSprite = labelSprite;
+      marker.userData.label = markerCounter;
+      markerCounter++;
+      
+      sphere.add(marker);
+      markers.push(marker);
+    }
+    function adjustMarkers() {
+      const desiredCount = collatzNumber * 3;
+      while (markers.filter(marker => !marker.userData.dying).length > desiredCount) {
+        for (let i = markers.length - 1; i >= 0; i--) {
+          if (!markers[i].userData.dying) {
+            markers[i].userData.dying = true;
+            markers[i].userData.targetOpacity = 0;
+            break;
+          }
+        }
+      }
+      while (markers.length < desiredCount) {
+        addNewMarker();
+      }
+    }
+
+    /***********************
+     * UTILITY: Emotion (Displayed in Red)
+     ***********************/
+    function getEmotion(h) {
+      if ((h >= 0 && h < 30) || (h >= 330 && h < 360)) {
+        return "Passionate";
+      } else if (h >= 30 && h < 60) {
+        return "Excited";
+      } else if (h >= 60 && h < 90) {
+        return "Happy";
+      } else if (h >= 90 && h < 150) {
+        return "Calm";
+      } else if (h >= 150 && h < 180) {
+        return "Relaxed";
+      } else if (h >= 180 && h < 240) {
+        return "Melancholic";
+      } else if (h >= 240 && h < 300) {
+        return "Creative";
+      } else if (h >= 300 && h < 330) {
+        return "Playful";
+      } else {
+        return "Neutral";
+      }
+    }
+
+    /***********************
+     * COLLATZ FUNCTION
+     ***********************/
+    function collatz(n) {
+      return (n % 2 === 0) ? n / 2 : 3 * n + 1;
+    }
+
+    /***********************
+     * ZIP CODE MAPPING (Fake Weather)
+     ***********************/
+    function collatzToZip(n) {
+      const validZipCodes = ["10001","90001","60601","94101","33101","77001","85001","19104","20001","30301"];
+      return validZipCodes[n % validZipCodes.length];
+    }
+
+    /***********************
+     * FAKE WEATHER DATA & UPDATE
+     ***********************/
+    const fakeWeatherData = [
+      { zip: "10001", city: "New York", state: "NY", description: "Sunny", temp: 75, icon: "01d" },
+      { zip: "90001", city: "Los Angeles", state: "CA", description: "Cloudy", temp: 68, icon: "03d" },
+      { zip: "60601", city: "Chicago", state: "IL", description: "Windy", temp: 60, icon: "50d" },
+      { zip: "94101", city: "San Francisco", state: "CA", description: "Foggy", temp: 55, icon: "50d" },
+      { zip: "33101", city: "Miami", state: "FL", description: "Rainy", temp: 82, icon: "09d" },
+      { zip: "77001", city: "Houston", state: "TX", description: "Hot", temp: 95, icon: "01d" },
+      { zip: "85001", city: "Phoenix", state: "AZ", description: "Sunny", temp: 102, icon: "01d" },
+      { zip: "19104", city: "Philadelphia", state: "PA", description: "Partly Cloudy", temp: 70, icon: "02d" },
+      { zip: "20001", city: "Washington", state: "DC", description: "Rainy", temp: 65, icon: "09d" },
+      { zip: "30301", city: "Atlanta", state: "GA", description: "Thunderstorms", temp: 77, icon: "11d" }
+    ];
+    // Update fake weather and return a weather info string.
+    function updateFakeWeather(zipCode) {
+      let weather = fakeWeatherData.find(item => item.zip === zipCode);
+      if (!weather) { 
+        weather = fakeWeatherData[Math.floor(Math.random() * fakeWeatherData.length)]; 
+      }
+      return " | " + weather.city + ", " + weather.state + " | " + weather.description + ", " + weather.temp + "°F";
+    }
+
+    /***********************
+     * CONTINUOUS COLLATS SEQUENCE DISPLAY
+     * Accumulate the Collatz sequence.
+     ***********************/
+    let collatzSequence = [7];
+    function updateCollatzSequence(newVal) {
+      collatzSequence.push(newVal);
+      if (collatzSequence.length > 30) {
+        collatzSequence.shift();
+      }
+    }
+
+    /***********************
+     * Array of Absurd Prediction Phrases
+     ***********************/
+    const predictions = [
+      "The great man will be struck down in the day by a thunderbolt",
+      "From the depths of the West of Europe, a young lion shall arise",
+      "The sky will burn with a fire as bright as the midday sun",
+      "An earthquake shall shake the foundations of the old world",
+      "Famine and pestilence will precede the rise of a new age",
+      "Mysteries of the stars will be unveiled in the shadow of despair",
+      "The crown of destiny shall fall to the hand of the unworthy",
+      "Dark clouds will gather over ancient lands, and hope will flicker",
+      "The river of time will overflow, washing away the vestiges of the past",
+      "A silent echo shall herald the dawn of a forgotten era"
+    ];
+
+    /***********************
+     * AUDIO SETUP (Cello-like Sound via Web Audio API)
+     * Two slightly detuned sawtooth oscillators are routed through a lowpass filter.
+     ***********************/
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillatorCello1 = audioCtx.createOscillator();
+    oscillatorCello1.type = 'sawtooth';
+    oscillatorCello1.frequency.value = 220;
+    const oscillatorCello2 = audioCtx.createOscillator();
+    oscillatorCello2.type = 'sawtooth';
+    oscillatorCello2.frequency.value = 220;
+    oscillatorCello2.detune.value = 5;
+    const celloGain = audioCtx.createGain();
+    celloGain.gain.value = 0.5;
+    const lowpassFilter = audioCtx.createBiquadFilter();
+    lowpassFilter.type = "lowpass";
+    lowpassFilter.frequency.value = 500;
+    oscillatorCello1.connect(celloGain);
+    oscillatorCello2.connect(celloGain);
+    celloGain.connect(lowpassFilter);
+    lowpassFilter.connect(audioCtx.destination);
+    oscillatorCello1.start();
+    oscillatorCello2.start();
+
+    /***********************
+     * UPDATE FUNCTION FOR COLLATZ & TARGETS
+     * (Updates at random intervals between 1 and 30 seconds)
+     ***********************/
+    let collatzInterval = Math.random() * 29 + 1;
+    function updateCollatz() {
+      collatzNumber = collatz(collatzNumber);
+      if (collatzNumber === 1) { collatzNumber = 7; }
+      updateCollatzSequence(collatzNumber);
+      // Map collatzNumber to a hue over the full spectrum.
+      let hue = (collatzNumber * 10) % 360;
+      targetColor.setHSL(hue/360, 1, 0.5);
+      if (collatzNumber % 2 === 1) {
+        markerTargetColor.setRGB(1, 0, 0);
+      } else {
+        markerTargetColor.setRGB(0, 1, 1);
+      }
+      const complementHue = (hue + 180) % 360;
+      targetBgColor.setHSL(complementHue/360, 1, 0.5);
+      rotationSpeed.set(
+        (Math.random()*0.002 - 0.001),
+        (Math.random()*0.002 - 0.001),
+        (Math.random()*0.002 - 0.001)
+      );
+      targetAngularFactor = (collatzNumber % 2 === 1) ? 1 : 0;
+      adjustMarkers();
+      markers.forEach(marker => {
+        marker.userData.target = generateMarkerTarget();
+        const newSize = 0.3 + Math.random() * 0.7;
+        marker.userData.targetScale.set(newSize, newSize, newSize);
+      });
+      const zipCode = collatzToZip(collatzNumber);
+      let weatherInfo = updateFakeWeather(zipCode);
+      // Compute a predicted future year.
+      let predictedYear = 2050 + collatzNumber * 3;
+      // Choose a random prediction phrase and insert spaces between its letters.
+      let randomPrediction = predictions[Math.floor(Math.random() * predictions.length)];
+      let spacedPrediction = randomPrediction.split('').join(' ');
+      // Update the bottom display with two lines:
+      // First line: Collatz sequence + weather info.
+      // Second line: The prediction typed out letter-by-letter.
+      document.getElementById('collatzDisplay').innerHTML =
+        collatzSequence.join(", ") + weatherInfo + "<br><span id='predictionText'></span>";
+      typeOutText("Prediction for " + predictedYear + ": " + spacedPrediction, document.getElementById('predictionText'), 100);
+      oscillatorCello1.frequency.setValueAtTime(220 + collatzNumber, audioCtx.currentTime);
+      oscillatorCello2.frequency.setValueAtTime(220 + collatzNumber, audioCtx.currentTime);
+      collatzInterval = Math.random() * 29 + 1;
+    }
+
+    /***********************
+     * ANIMATION LOOP
+     * Updates occur at random intervals.
+     ***********************/
+    let timeSinceLastUpdate = 0;
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      timeSinceLastUpdate += delta;
+
+      sphere.rotation.x += rotationSpeed.x;
+      sphere.rotation.y += rotationSpeed.y;
+      sphere.rotation.z += rotationSpeed.z;
+
+      const positions = sphereGeometry.attributes.position.array;
+      const orig = sphereGeometry.userData.originalPositions;
+      const timeVal = performance.now() * 0.0005;
+      const morphFactor = 0.5 + 0.5 * Math.sin(timeVal * 0.5);
+      currentAngularFactor += (targetAngularFactor - currentAngularFactor) * 0.001;
+      const quantStep = 0.05;
+      for (let i = 0; i < positions.length; i += 3) {
+        const ox = orig[i], oy = orig[i+1], oz = orig[i+2];
+        const noiseVal = simplex.noise(ox * 0.5, oy * 0.5, oz * 0.5 + timeVal);
+        let smoothDisp = noiseVal * morphFactor * 0.5;
+        let quantDisp = Math.round(smoothDisp / quantStep) * quantStep;
+        let finalDisp = (1 - currentAngularFactor) * smoothDisp + currentAngularFactor * quantDisp;
+        const len = Math.sqrt(ox*ox + oy*oy + oz*oz);
+        const nx = ox/len, ny = oy/len, nz = oz/len;
+        positions[i]   = ox + nx * finalDisp;
+        positions[i+1] = oy + ny * finalDisp;
+        positions[i+2] = oz + nz * finalDisp;
+      }
+      sphereGeometry.attributes.position.needsUpdate = true;
+
+      sphereMaterial.color.lerp(targetColor, 0.001);
+
+      markers.forEach(marker => {
+        marker.position.lerp(marker.userData.target, 0.002);
+        marker.material.color.lerp(markerTargetColor, 0.001);
+        marker.scale.lerp(marker.userData.targetScale, 0.002);
+        marker.material.opacity += (marker.userData.targetOpacity - marker.material.opacity) * 0.002;
+        if (marker.userData.labelSprite) {
+          marker.userData.labelSprite.position.set(0, marker.scale.y * 0.75, 0);
+        }
+      });
+      for (let i = markers.length - 1; i >= 0; i--) {
+        if (markers[i].userData.dying && markers[i].material.opacity < 0.05) {
+          sphere.remove(markers[i]);
+          markers.splice(i, 1);
+        }
+      }
+
+      currentBgColor.lerp(targetBgColor, 0.001);
+      renderer.setClearColor(currentBgColor);
+
+      // Update audio mix (the cello sound remains constant in timbre).
+      if (timeSinceLastUpdate > collatzInterval) {
+        updateCollatz();
+        timeSinceLastUpdate = 0;
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    /***********************
+     * HANDLE WINDOW RESIZING
+     ***********************/
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
