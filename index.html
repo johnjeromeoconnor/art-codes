@@ -1939,7 +1939,15 @@ const originalEntities = [
                             if(el) {
                                 el.classList.add("word-revealed");
                                 el.classList.add("word-active");
-                                el.scrollIntoView({behavior: "smooth", block: "center"});
+                                // REPLACEMENT: Gentle scroll that stays inside the container
+const container = document.getElementById("text-container");
+if (container && el) {
+    const relativeTop = el.offsetTop;
+    container.scrollTo({
+        top: relativeTop - (container.clientHeight / 2) + (el.clientHeight / 2),
+        behavior: "smooth"
+    });
+}
                                 
                                 // Reveal Hidden Message Part
                                 if(el.dataset.target === "true") {
