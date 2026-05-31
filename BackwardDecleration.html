@@ -15,6 +15,25 @@
       color: blue;
       transition: background-color 0.5s ease, color 0.5s ease;
     }
+    
+    /* --- NEW OVERLAY STYLES --- */
+    #startOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: red;
+      color: blue;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5em;
+      cursor: pointer;
+      z-index: 1000;
+      transition: opacity 0.5s ease;
+    }
+    
     h1 {
       text-align: center;
       margin-bottom: 4px;
@@ -34,7 +53,6 @@
     .word {
       display: inline-block;
       padding: 0 0.5em;
-      /* Ensure transition applies to background-color and color */
       transition: background-color 0.5s ease, color 0.5s ease, font-weight 0.5s ease;
     }
     .letter {
@@ -43,6 +61,10 @@
   </style>
 </head>
 <body>
+
+  <!-- --- NEW CLICK TO START OVERLAY --- -->
+  <div id="startOverlay">Click to Start</div>
+
   <h1 id="headerTitle">Declaration of Independence</h1>
   <div id="displayArea"></div>
   <script>
@@ -80,73 +102,61 @@ We hold these truths to be self-evident, that all men are created equal, that th
       processTextIntoWords(displayArea, declarationText);
       let header = document.getElementById("headerTitle");
       let titleText = header.dataset.originalText || "Declaration of Independence";
-      // Store original title text if not already done (e.g., on first load)
       if (!header.dataset.originalText) {
           header.dataset.originalText = titleText;
       }
       processTextIntoWords(header, titleText);
     }
 
-
     // Set up Web Audio API.
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Compute frequency based on letter count.
     function getFrequencyForWord(letterCount) {
-      // Low base, smaller multiplier for less drastic increase
       return 50 + letterCount * 20;
     }
 
-    // Play a note for a given frequency. Sound characteristics depend on the phase.
-    // MODIFIED: Glissando direction reversed for phases.
     function playNoteForFrequency(baseFrequency, baseAnimationDurationSeconds, isRevertPhase) {
-      // If the user hasn't clicked yet, skip making the note so they don't pile up
       if (audioCtx.state === "suspended") {
         return; 
       }
 
       const now = audioCtx.currentTime;
-      const mainGainNode = audioCtx.createGain(); // Controls overall volume of the layered sound
+      const mainGainNode = audioCtx.createGain(); 
       mainGainNode.connect(audioCtx.destination);
 
       const attackTime = 0.05;
-      const overallPeakVolume = 0.5; // Adjusted peak volume for layered sounds
+      const overallPeakVolume = 0.5; 
 
       let soundDuration;
       let fadeDuration;
       let oscillatorType;
-      const baseGlissSweepHz = 20; // Base amount of sweep
+      const baseGlissSweepHz = 20; 
       let glissSweepHz;
 
-
-      // --- Define Octave Layers and their relative amplitudes ---
       const octaveLayers = [
-        { ratio: 0.5, amplitude: 0.25 }, // One octave below
-        { ratio: 1.0, amplitude: 0.5  }, // Fundamental
-        { ratio: 2.0, amplitude: 0.25 }  // One octave above
+        { ratio: 0.5, amplitude: 0.25 },
+        { ratio: 1.0, amplitude: 0.5  },
+        { ratio: 2.0, amplitude: 0.25 }
       ];
 
       if (isRevertPhase) {
-          // --- Phase 2: Reverting to Original (Piano-like) ---
-          soundDuration = baseAnimationDurationSeconds; // Duration matches animation
-          fadeDuration = 1.0; // Slow fade-out
+          soundDuration = baseAnimationDurationSeconds; 
+          fadeDuration = 1.0; 
           oscillatorType = 'triangle';
-          glissSweepHz = baseGlissSweepHz; // Sweep UPWARDS (rising)
+          glissSweepHz = baseGlissSweepHz; 
       } else {
-          // --- Phase 1: Original to Reversed (Sustained Sine) ---
-          soundDuration = baseAnimationDurationSeconds; // Tied to animation duration
-          fadeDuration = 1.5; // Long decay tail
+          soundDuration = baseAnimationDurationSeconds; 
+          fadeDuration = 1.5; 
           oscillatorType = 'sine';
-          glissSweepHz = -baseGlissSweepHz; // Sweep DOWNWARDS (falling)
+          glissSweepHz = -baseGlissSweepHz; 
       }
 
-      // --- Create and configure oscillators for each layer ---
       const oscillators = octaveLayers.map(layer => {
         const osc = audioCtx.createOscillator();
-        const layerGain = audioCtx.createGain(); // Individual gain for this layer's amplitude
+        const layerGain = audioCtx.createGain(); 
 
         osc.type = oscillatorType;
-        const startFreq = Math.max(20, baseFrequency * layer.ratio); // Ensure freq is audible
+        const startFreq = Math.max(20, baseFrequency * layer.ratio); 
         const endFreq = Math.max(20, startFreq + glissSweepHz);
 
         osc.frequency.setValueAtTime(startFreq, now);
@@ -158,30 +168,23 @@ We hold these truths to be self-evident, that all men are created equal, that th
         return osc;
       });
 
-      // --- Overall Envelope (applied to mainGainNode) ---
-      // 1. Attack
       mainGainNode.gain.setValueAtTime(0, now);
       mainGainNode.gain.linearRampToValueAtTime(overallPeakVolume, now + attackTime);
 
-      // 2. Sustain ends after the calculated soundDuration
       const sustainEndsAt = now + attackTime + soundDuration;
-      mainGainNode.gain.setValueAtTime(overallPeakVolume, sustainEndsAt); // Hold peak volume
+      mainGainNode.gain.setValueAtTime(overallPeakVolume, sustainEndsAt); 
 
-      // 3. Fade / Release using the calculated fadeDuration
       const fadeEndsAt = sustainEndsAt + fadeDuration;
-      mainGainNode.gain.linearRampToValueAtTime(0.0001, fadeEndsAt); // Ramp down to silence
+      mainGainNode.gain.linearRampToValueAtTime(0.0001, fadeEndsAt); 
 
-      // 4. Calculate stop time for oscillators
       const stopTime = fadeEndsAt + 0.1;
 
-      // --- Start/Stop Oscillators ---
       oscillators.forEach(osc => {
           osc.start(now);
           osc.stop(stopTime);
       });
     }
 
-    // Animate toggling of a single word.
     function animateToggleWord(wordContainer, toReversed, callback) {
       const wordSpan = wordContainer.querySelector('.word');
       if (!wordSpan) { if (callback) callback(); return; }
@@ -201,7 +204,6 @@ We hold these truths to be self-evident, that all men are created equal, that th
         return letterSpan;
       });
 
-      // Define color pairs for Phase 1 (chaotic, changing)
       const phase1ColorPairs = [
           {bg: "black", text: "white"}, {bg: "green", text: "orange"},
           {bg: "purple", text: "yellow"}, {bg: "darkblue", text: "lightblue"},
@@ -212,7 +214,7 @@ We hold these truths to be self-evident, that all men are created equal, that th
           {bg: "darkorange", text: "white" },
           {bg: "lightsalmon", text: "maroon" }
       ];
-      // Define color pairs for Phase 2 (rainbow-like, fixed per word)
+      
       const phase2ColorPairs = [
           {bg: "red", text: "yellow"}, {bg: "orange", text: "blue"},
           {bg: "yellow", text: "green"}, {bg: "lime", text: "purple"},
@@ -220,24 +222,20 @@ We hold these truths to be self-evident, that all men are created equal, that th
           {bg: "magenta", text: "lime"}, {bg: "white", text: "black"}
       ];
 
-      // Set animation start colors
       if (toReversed) {
-        // Phase 1: Original -> Reversed. Pick an initial random temporary color pair.
         const chosenPair = phase1ColorPairs[Math.floor(Math.random() * phase1ColorPairs.length)];
         wordSpan.style.backgroundColor = chosenPair.bg;
         wordSpan.style.color = chosenPair.text;
       } else {
-        // Phase 2: Reversed -> Original. Pick a *single* random rainbow pair for this word's animation.
         const chosenPair = phase2ColorPairs[Math.floor(Math.random() * phase2ColorPairs.length)];
         wordSpan.style.backgroundColor = chosenPair.bg;
         wordSpan.style.color = chosenPair.text;
       }
 
       let freq = getFrequencyForWord(originalLetters.length);
-      const swapIntervalMs = 3000; // Slow swap interval
+      const swapIntervalMs = 3000; 
       const animationDurationSeconds = (originalLetters.length * swapIntervalMs) / 1000.0;
 
-      // Pass !toReversed as the isRevertPhase parameter
       const isRevertPhase = !toReversed;
       playNoteForFrequency(freq, animationDurationSeconds, isRevertPhase);
 
@@ -246,47 +244,38 @@ We hold these truths to be self-evident, that all men are created equal, that th
 
       function processSwap() {
         if (currentStep < totalAnimatedSteps - 1 && letterSpans.length > 1) {
-          // --- Perform Swap ---
           let i = Math.floor(Math.random() * letterSpans.length);
           let j = Math.floor(Math.random() * letterSpans.length);
           while (j === i) { j = Math.floor(Math.random() * letterSpans.length); }
           let temp = letterSpans[i].textContent;
           letterSpans[i].textContent = letterSpans[j].textContent;
           letterSpans[j].textContent = temp;
-          // --- End Swap ---
 
-          // Randomly change color ONLY during Phase 1 swaps
           if (toReversed) {
               const randomPair = phase1ColorPairs[Math.floor(Math.random() * phase1ColorPairs.length)];
               wordSpan.style.backgroundColor = randomPair.bg;
               wordSpan.style.color = randomPair.text;
           }
-          // In Phase 2, the color remains the chosen rainbow pair until the end.
 
           currentStep++;
           setTimeout(processSwap, swapIntervalMs);
         } else {
-          // --- Final State ---
           let finalLetters = toReversed ? originalLetters.slice().reverse() : originalLetters.slice();
-          // Adjust spans if needed
            while (letterSpans.length < finalLetters.length) {
               let letterSpan = document.createElement("span"); letterSpan.className = "letter"; wordSpan.appendChild(letterSpan); letterSpans.push(letterSpan);
           }
           while (letterSpans.length > finalLetters.length) { wordSpan.removeChild(letterSpans.pop()); }
-          // Set final text
           for (let k = 0; k < finalLetters.length; k++) { letterSpans[k].textContent = finalLetters[k]; }
-          // Set final style (bolding and final colors)
+          
           wordSpan.style.fontWeight = toReversed ? "bold" : "normal";
-          wordSpan.style.backgroundColor = toReversed ? "blue" : "red"; // Final state color
-          wordSpan.style.color = toReversed ? "red" : "blue";           // Final state color
-          if (callback) callback(); // Signal completion
-          // --- End Final State ---
+          wordSpan.style.backgroundColor = toReversed ? "blue" : "red"; 
+          wordSpan.style.color = toReversed ? "red" : "blue";           
+          if (callback) callback(); 
         }
       }
-      setTimeout(processSwap, 50); // Start animation loop slightly delayed
+      setTimeout(processSwap, 50); 
     }
 
-    // Handles two different animation strategies based on 'toReversed'.
     function toggleElementWordsRandomly(element, toReversed, mainCallback) {
         let wordContainers = Array.from(element.querySelectorAll(".redacted"));
         let totalAnimationsNeeded = wordContainers.length;
@@ -294,20 +283,17 @@ We hold these truths to be self-evident, that all men are created equal, that th
         let currentlyAnimatingCount = 0;
         let wordQueue = [...wordContainers];
 
-        // For Phase 2 (revert) - Escalating Group Logic
         let currentPhase2GroupTarget = 1;
         const maxEscalatingGroupTarget = 4;
         const finalChaosConcurrencyTarget = 15;
         let wordsLaunchedForCurrentGroupTarget = 0;
         let wordsFinishedForCurrentGroupTarget = 0;
 
-
         if (totalAnimationsNeeded === 0) {
             if (mainCallback) mainCallback();
             return;
         }
 
-        // Shuffle the queue for random processing order
         for (let i = wordQueue.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [wordQueue[i], wordQueue[j]] = [wordQueue[j], wordQueue[i]];
@@ -322,7 +308,7 @@ We hold these truths to be self-evident, that all men are created equal, that th
                 return;
             }
 
-            if (!toReversed) { // If it's Phase 2 (revert)
+            if (!toReversed) { 
                 wordsFinishedForCurrentGroupTarget++;
                 if (currentPhase2GroupTarget <= maxEscalatingGroupTarget &&
                     wordsLaunchedForCurrentGroupTarget === currentPhase2GroupTarget &&
@@ -331,19 +317,16 @@ We hold these truths to be self-evident, that all men are created equal, that th
                     currentPhase2GroupTarget++;
                     wordsLaunchedForCurrentGroupTarget = 0;
                     wordsFinishedForCurrentGroupTarget = 0;
-                    const delayBeforeNextGroup = Math.random() * 4000 + 3000; // 3-7s delay
-                    console.log(`Element ${element.id}: Group of ${currentPhase2GroupTarget-1} finished. Starting group of ${currentPhase2GroupTarget} after ${delayBeforeNextGroup/1000}s`);
+                    const delayBeforeNextGroup = Math.random() * 4000 + 3000; 
                     setTimeout(launchNextBatchInRevertPhase, delayBeforeNextGroup);
                 } else {
-                    const fillSlotDelay = Math.random() * 500 + 100; // 0.1-0.6s (quicker to fill slots)
+                    const fillSlotDelay = Math.random() * 500 + 100; 
                     setTimeout(launchNextBatchInRevertPhase, fillSlotDelay);
                 }
             }
         }
 
-
         if (toReversed) {
-            // --- Strategy 1: Concurrent with Staggered Start (Original to Reversed) ---
             wordContainers.forEach(container => {
                 const minStartDelay = 1500;
                 const maxStartDelay = 8000;
@@ -354,7 +337,6 @@ We hold these truths to be self-evident, that all men are created equal, that th
                 }, randomStartDelay);
             });
         } else {
-            // --- Strategy 2: Escalating Concurrency (Reversed to Original) ---
             function launchNextBatchInRevertPhase() {
                 if (wordQueue.length === 0) return;
 
@@ -370,7 +352,6 @@ We hold these truths to be self-evident, that all men are created equal, that th
                 numToLaunchNow = Math.min(numToLaunchNow, wordQueue.length);
                 numToLaunchNow = Math.max(0, numToLaunchNow);
 
-
                 for (let i = 0; i < numToLaunchNow; i++) {
                     if (wordQueue.length === 0) break;
 
@@ -382,69 +363,69 @@ We hold these truths to be self-evident, that all men are created equal, that th
                     const staggerDelay = i * (Math.random() * 400 + 200); 
 
                     setTimeout(() => {
-                         console.log(`Element ${element.id} Phase 2: Launching. GroupTarget: ${currentPhase2GroupTarget}, LaunchedInGroup: ${wordsLaunchedForCurrentGroupTarget}, FinishedInGroup: ${wordsFinishedForCurrentGroupTarget}, Animating: ${currentlyAnimatingCount}, Queue: ${wordQueue.length}`);
                          animateToggleWord(nextContainer, false, onWordAnimationComplete);
                     }, staggerDelay);
                 }
             }
 
-            // Initial kick-off for the revert phase:
-            const initialPhaseDelay = Math.random() * 5000 + 3000; // 3-8s before anything starts
-            console.log(`Element ${element.id}: Starting Phase 2 (Revert) after ${initialPhaseDelay/1000}s. Initial group target: ${currentPhase2GroupTarget}`);
+            const initialPhaseDelay = Math.random() * 5000 + 3000; 
             setTimeout(launchNextBatchInRevertPhase, initialPhaseDelay);
         }
     }
 
-
     let isReversed = false;
 
     function toggleReversal() {
-      // Ignore the audio state entirely and just start the visuals!
       proceedWithToggle();
     }
 
     function proceedWithToggle() {
       let finishedCount = 0;
-      const requiredFinishCount = 2; // Header + Display Area
+      const requiredFinishCount = 2; 
 
       function checkFinished() {
           finishedCount++;
           if (finishedCount >= requiredFinishCount) {
-              // Update background AFTER animations complete
-              if (!isReversed) { // Just finished animating TO reversed
+              if (!isReversed) { 
                   displayArea.style.backgroundColor = "blue";
                   displayArea.style.color = "red";
                   document.body.style.backgroundColor = "blue";
                   document.body.style.color = "red";
                   isReversed = true;
-              } else { // Just finished animating BACK to original
+              } else { 
                   displayArea.style.backgroundColor = "red";
                   displayArea.style.color = "blue";
                   document.body.style.backgroundColor = "red";
                   document.body.style.color = "blue";
                   isReversed = false;
               }
-              setTimeout(toggleReversal, 25000); // Schedule next toggle
+              setTimeout(toggleReversal, 25000); 
           }
       }
 
-      // Call the appropriate animation strategy based on current state
-      // The 'toReversed' parameter passed here determines the strategy AND the sound characteristics
       toggleElementWordsRandomly(document.getElementById("headerTitle"), !isReversed, checkFinished);
       toggleElementWordsRandomly(document.getElementById("displayArea"), !isReversed, checkFinished);
     }
     
+    // --- UPDATED INITIALIZATION ---
     window.onload = function() {
       processDocument(); // Initial setup, stores original text
 
-      document.body.addEventListener('click', () => {
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume().catch(e => console.error("AudioContext resume on click failed:", e));
-        }
-      }, { once: true });
+      const overlay = document.getElementById("startOverlay");
+      
+      overlay.addEventListener('click', () => {
+        // 1. Fade out and remove the overlay
+        overlay.style.opacity = "0";
+        setTimeout(() => overlay.style.display = "none", 500);
 
-      // Starts the visual animation after exactly 20 seconds
-      setTimeout(toggleReversal, 20000); 
+        // 2. Safely wake up the audio context
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(e => console.error("AudioContext resume failed:", e));
+        }
+
+        // 3. Start the visual animation immediately!
+        toggleReversal(); 
+      }, { once: true });
     };
   </script>
 </body>
