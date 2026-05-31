@@ -14,24 +14,8 @@
       background-color: red;
       color: blue;
       transition: background-color 0.5s ease, color 0.5s ease;
-    }
-    
-    /* --- NEW OVERLAY STYLES --- */
-    #startOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: red;
-      color: blue;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2.5em;
-      cursor: pointer;
-      z-index: 1000;
-      transition: opacity 0.5s ease;
+      /* Add a pointer cursor so visitors know the whole page is interactive */
+      cursor: pointer; 
     }
     
     h1 {
@@ -61,9 +45,6 @@
   </style>
 </head>
 <body>
-
-  <!-- --- NEW CLICK TO START OVERLAY --- -->
-  <div id="startOverlay">Click to Start</div>
 
   <h1 id="headerTitle">Declaration of Independence</h1>
   <div id="displayArea"></div>
@@ -409,22 +390,22 @@ We hold these truths to be self-evident, that all men are created equal, that th
     
     // --- UPDATED INITIALIZATION ---
     window.onload = function() {
-      processDocument(); // Initial setup, stores original text
+      processDocument(); // Initial setup, stores original text on screen
 
-      const overlay = document.getElementById("startOverlay");
-      
-      overlay.addEventListener('click', () => {
-        // 1. Fade out and remove the overlay
-        overlay.style.opacity = "0";
-        setTimeout(() => overlay.style.display = "none", 500);
-
-        // 2. Safely wake up the audio context
+      // Entire document waits for a single click to begin
+      document.body.addEventListener('click', () => {
+        
+        // 1. Safely wake up the audio context
         if (audioCtx.state === 'suspended') {
           audioCtx.resume().catch(e => console.error("AudioContext resume failed:", e));
         }
 
-        // 3. Start the visual animation immediately!
+        // 2. Start the visual animation
         toggleReversal(); 
+        
+        // 3. Remove the pointer cursor so it feels like a normal screen again
+        document.body.style.cursor = "default";
+        
       }, { once: true });
     };
   </script>
