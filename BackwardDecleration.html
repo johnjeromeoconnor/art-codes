@@ -100,9 +100,11 @@ We hold these truths to be self-evident, that all men are created equal, that th
     // Play a note for a given frequency. Sound characteristics depend on the phase.
     // MODIFIED: Glissando direction reversed for phases.
     function playNoteForFrequency(baseFrequency, baseAnimationDurationSeconds, isRevertPhase) {
+      // If the user hasn't clicked yet, skip making the note so they don't pile up
       if (audioCtx.state === "suspended") {
-        audioCtx.resume().catch(e => console.error("AudioContext resume failed:", e));
+        return; 
       }
+
       const now = audioCtx.currentTime;
       const mainGainNode = audioCtx.createGain(); // Controls overall volume of the layered sound
       mainGainNode.connect(audioCtx.destination);
@@ -397,14 +399,8 @@ We hold these truths to be self-evident, that all men are created equal, that th
     let isReversed = false;
 
     function toggleReversal() {
-      if (audioCtx.state === "suspended") {
-        audioCtx.resume().then(proceedWithToggle).catch(e => {
-            console.error("AudioContext resume failed:", e);
-            proceedWithToggle();
-        });
-      } else {
-          proceedWithToggle();
-      }
+      // Ignore the audio state entirely and just start the visuals!
+      proceedWithToggle();
     }
 
     function proceedWithToggle() {
@@ -437,7 +433,7 @@ We hold these truths to be self-evident, that all men are created equal, that th
       toggleElementWordsRandomly(document.getElementById("headerTitle"), !isReversed, checkFinished);
       toggleElementWordsRandomly(document.getElementById("displayArea"), !isReversed, checkFinished);
     }
-
+    
     window.onload = function() {
       processDocument(); // Initial setup, stores original text
 
@@ -447,7 +443,8 @@ We hold these truths to be self-evident, that all men are created equal, that th
         }
       }, { once: true });
 
-      setTimeout(toggleReversal, 25000); // Start the first cycle
+      // Starts the visual animation after exactly 20 seconds
+      setTimeout(toggleReversal, 20000); 
     };
   </script>
 </body>
