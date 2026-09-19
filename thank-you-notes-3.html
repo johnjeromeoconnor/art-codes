@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THANK YOU</title>
+<style>
+  :root { color-scheme: light; --lh: 30.96px; --rule: 29.96px; }
+  html, body { background:#ffffff; }
+  body {
+    font-family:"Courier New", Courier, monospace;
+    font-size:18px;
+    line-height:1.72;
+    margin:0;
+    padding:44px 20px 0;
+    color:#444;
+  }
+  #stream { max-width:640px; margin:0 auto; }
+
+  .letter {
+    white-space:pre-wrap;
+    font-weight:700;
+    letter-spacing:.005em;
+    margin:0 0 3.1em 0;
+    padding:var(--lh) 1.9em calc(var(--lh) * 1.5);
+    box-sizing:border-box;
+    aspect-ratio:8.5 / 11;
+    background-size:100% var(--lh);
+    border:0;
+    border-left:1px solid #dcdcdc;
+    border-right:1px solid #dcdcdc;
+    position:relative;
+    background-color:#ffffff;
+    background-image:repeating-linear-gradient(to bottom,
+      rgba(122,172,216,0) 0,
+      rgba(122,172,216,0) var(--rule),
+      rgba(122,172,216,.6) var(--rule),
+      rgba(122,172,216,.6) var(--lh));
+    background-origin:content-box;
+    background-clip:content-box;
+  }
+  .num { opacity:.45; margin:0 0 var(--lh) 0; font-weight:700; }
+
+  .sig { display:block; margin:calc(var(--lh) * 1.2) 0 0 1.2em; }
+  .sig svg { display:block; width:210px; height:74px; overflow:visible; }
+
+  .edge { position:absolute; left:0; width:100%; height:16px; overflow:visible; pointer-events:none; }
+  .edge-t { top:-8px; }
+  .edge-b { bottom:-8px; transform:scaleY(-1); }
+
+  .sel { background:var(--ink); color:#ffffff; }
+  .caret {
+    display:inline-block;
+    width:0.5em;
+    height:1.05em;
+    background:#cfcfcf;
+    vertical-align:-0.19em;
+    margin-left:0.04em;
+  }
+  #save {
+    position:fixed; right:14px; bottom:14px; z-index:9;
+    font-family:"Courier New", Courier, monospace; font-size:12px;
+    padding:8px 12px; border:1px solid rgba(0,0,0,.3);
+    background:rgba(255,255,255,.85); color:#000;
+    opacity:.45; cursor:pointer; transition:opacity .25s;
+  }
+  #save:hover { opacity:1; }
+  #tail { height:62vh; }
+  @media (max-width:520px) {
+    body { font-size:17px; padding:26px 12px 0; }
+    .letter { padding:var(--lh) 1.1em calc(var(--lh) * 1.5); }
+  }
+</style>
+</head>
+<body>
+<div id="stream"></div>
+<div id="tail"></div>
+<button id="save">save pdf</button>
+
+<script>
+window.onerror = function (m, src, ln) {
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99;background:#c00;color:#fff;' +
+    'font:12px/1.5 monospace;padding:10px 14px;white-space:pre-wrap';
+  box.textContent = "script error: " + m + "  (line " + ln + ")";
+  document.body.appendChild(box);
+};
+
+let LH = 30.96;                       // the ruled line height, measured on load
+
+/*BEGIN-GEN*/
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const chance = p => Math.random() < p;
+const ri = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const _last = {};
+function fresh(key, arr) {
+  let v = pick(arr);
+  if (arr.length > 2 && v === _last[key]) v = pick(arr);
+  _last[key] = v;
+  return v;
+}
+function some(arr, n) {
+  const c = arr.slice();
+  const out = [];
+  while (n-- > 0 && c.length) out.push(c.splice(Math.floor(Math.random() * c.length), 1)[0]);
+  return out;
+}
+
+const THINGS = [
+  "the pears", "the loan of the ladder", "the ride to the station", "the lasagna",
+  "the extra chair", "the extension cord", "the studio visit", "the introduction to your framer",
+  "the seat by the window", "the two hours of your Tuesday", "the umbrella", "the directions",
+  "the tomatoes", "the use of your driveway", "the phone call on Sunday", "the jumper cables",
+  "the recommendation", "the box of cards", "the walk to the corner", "checking on the house"
+];
+
+const FADED = [
+  "whatever it was", "the original kindness", "the thing itself, which I no longer recall",
+  "the first of it", "something you did in the spring", "the reason for all this"
+];
+
+const SALUTATION = [
+  "Dear John,", "John,", "Dear John,", "John,", "Dear John,"
+];
+
+const JOHNS = ["John"];
+
+const NOTE = [
+  "note", "card", "letter", "reply", "kind note", "few lines", "message",
+  "thank-you", "acknowledgment", "second note", "last card"
+];
+
+const OPENER = [
+  "Thank you", "Thank you again", "My thanks", "Many thanks",
+  "I am writing to thank you", "I write to thank you",
+  "I could not let the day pass without thanking you",
+  "Thank you, sincerely,", "I am so grateful to you",
+  "How good of you to think of me. Thank you",
+  "It was kind of you. Thank you", "Thanks",
+  "So then. Thank you", "Well. Thank you",
+  "Before anything else, thank you", "This is mostly to thank you",
+  "Briefly, to thank you", "I owe you thanks"
+];
+
+const TERSE = [
+  "Thank you.", "And thank you.", "Received, with thanks.", "Thank you for that.",
+  "Yes. Thank you.", "Noted, with thanks.", "Thank you. Again.", "Again: thank you."
+];
+
+// ---- moods, arranged so neighbors are adjacent in feeling ---------------
+const MOODS = [
+  {
+    name: "mundane",
+    pace: 1.0,
+    body: [
+      "I write these at the same hour. I find the hour matters.",
+      "The paper is in the second drawer and the pens are in the first.",
+      "Nothing has changed since the last one, which is itself worth reporting.",
+      "I record the time I begin and the time I finish.",
+      "The count is current as of this morning.",
+      "I check the box at eleven and again at four.",
+      "There is a system now. I did not set out to have one."
+    ],
+    close: ["Yours,", "Sincerely,", "As always,", "With thanks,"],
+    ps: ["P.S. No reply necessary.", "P.S. Filed with the others."]
+  },
+  {
+    name: "warm",
+    pace: 1.0,
+    body: [
+      "You have never missed one. I want that acknowledged somewhere.",
+      "Whatever else is true, we have both held up our end.",
+      "I know what it costs you, because it costs me the same.",
+      "I would not want anyone else at the other end of this.",
+      "You are the only one who understands the arrangement.",
+      "I read it twice before I filed it, which is my highest compliment."
+    ],
+    close: ["Gratefully,", "Warmly,", "With thanks,", "Ever grateful,"],
+    ps: ["P.S. You did well with the last one.", "P.S. I meant all of it."]
+  },
+  {
+    name: "tender",
+    pace: 1.25,
+    body: [
+      "I recognize the hand. I have decided not to think about that today.",
+      "You sound tired in this one. Rest if you are able.",
+      "I keep the first one where I can see it from the chair.",
+      "If one of us is unwell it is not for me to say which.",
+      "I have wondered what happens if one of us stops, and I would rather not be the one who finds out.",
+      "I was going to say something else here and then I did not."
+    ],
+    close: ["Yours,", "With love,", "Softly,", "Yours always,"],
+    ps: ["P.S. Sleep if you can.", "P.S. I am not asking for anything."]
+  },
+  {
+    name: "elated",
+    pace: 0.78,
+    body: [
+      "I woke at four and it was already clear to me.",
+      "It is working. I want you to know that it is working.",
+      "I laid them out on the floor in order and the shape of it was correct.",
+      "I have never been as certain of anything as I am of the arrangement.",
+      "I could do this all day and in fact I have.",
+      "Everything is in order and the order is the whole point."
+    ],
+    close: ["With enormous thanks,", "Delightedly,", "Joyfully,", "Again, thank you,"],
+    ps: ["P.S. Write back immediately.", "P.S. I have started the next one already."]
+  },
+  {
+    name: "wistful",
+    pace: 1.3,
+    body: [
+      "There was a period before this and I cannot recall what filled it.",
+      "I no longer know which of us began.",
+      "The first one is in a hand I do not entirely recognize.",
+      "Years, if the numbering is honest.",
+      "I stopped expecting an end and the stopping was a relief.",
+      "The stack has a shape now and the shape is most of what I have."
+    ],
+    close: ["Yours,", "As ever,", "Still yours,", "With continued thanks,"],
+    ps: ["P.S. Nothing enclosed.", "P.S. I could not think what to send."]
+  },
+  {
+    name: "strained",
+    pace: 1.1,
+    body: [
+      "It takes the whole morning now.",
+      "I write before I let myself eat.",
+      "The obligation is not the writing. The obligation is not falling behind.",
+      "I have begun the next one in my head before this one is sealed.",
+      "I have missed things in order to stay current.",
+      "I told myself I would let the last one stand. I could not."
+    ],
+    close: ["Yours in thanks,", "Again, thank you,", "Sincerely,", "With continued thanks,"],
+    ps: ["P.S. Disregard the timing of the last one.", "P.S. Apologies if this arrives twice."]
+  },
+  {
+    name: "paranoid",
+    pace: 1.45,
+    body: [
+      "You changed a word this time. I checked against my copy.",
+      "I did not write no. 14. I have looked, and I did not write it.",
+      "I have begun leaving one small error in each, to see whether it comes back to me.",
+      "It came back to me.",
+      "The wording in yours was mine, down to the comma.",
+      "I photograph them now before they go out.",
+      "Someone reads these before you do. I am not saying who."
+    ],
+    close: ["Yours,", "Watchfully,", "Sincerely,", "I remain,"],
+    ps: ["P.S. Confirm receipt in your own words.", "P.S. Do not send this one back."]
+  },
+  {
+    name: "insistent",
+    pace: 1.5,
+    body: [
+      "I will not be the one who stops.",
+      "You know the hour. So do I.",
+      "If this is a test, note that I am still here.",
+      "There is no version of this in which I go first.",
+      "I have made arrangements for them to continue if I cannot.",
+      "Answer or do not answer. The count goes on either way."
+    ],
+    close: ["Until the next one,", "Yours, without fail,", "I remain,", "Yours,"],
+    ps: ["P.S. This is not the last one.", "P.S. Nor was the last one."]
+  },
+  {
+    name: "apologetic",
+    pace: 1.2,
+    body: [
+      "Disregard the last one. I was not myself when I wrote it.",
+      "I have read it back and I am ashamed of the middle paragraph.",
+      "That was the tiredness and not me.",
+      "I should not have accused you. The error was mine and I planted it.",
+      "Forgive the delay. I wanted the wording exact.",
+      "Let us resume from wherever you prefer."
+    ],
+    close: ["With apologies,", "Sorry, and thank you,", "Yours,", "Sincerely,"],
+    ps: ["P.S. Sorry again.", "P.S. Ignore the postscript on the last one."]
+  }
+];
+
+const DIGRESSION = [
+  "My hand is not steady in the afternoons.",
+  "I have moved the chair so that I face the door.",
+  "I counted the drawer twice and arrived at two numbers.",
+  "There is a sound in the house at the hour I write and I have stopped looking for it.",
+  "I read them aloud now, to check that they sound like me.",
+  "I do not open yours until mine is finished, so as not to be influenced.",
+  "I write standing up. I cannot tell you when that began.",
+  "The dog watches me do this and I have wondered what she makes of it.",
+  "I sleep with the light on, which I mention only as a fact.",
+  "The pen skips on this paper and I am persevering.",
+  "I found a receipt in a coat pocket from a year I cannot account for.",
+  "It gets dark now before I have finished anything.",
+  "I have taken to numbering the envelopes as well, in case.",
+  "Everything on the desk is exactly where it was yesterday.",
+  "I took the long way back from the box and could not tell you why.",
+  "I have started keeping the carbon."
+];
+
+const ACCUM = [
+  "There is a stack, and the stack has a shape.",
+  "My handwriting has gotten worse and I am sorry for it.",
+  "I am no longer certain you are receiving these.",
+  "I am no longer certain I am sending them."
+];
+
+const LATE = [
+  "I found one in my own hand that I have no memory of writing.",
+  "If I am both of us, the arithmetic still holds.",
+  "There is one of me who writes these and one who reads them, and I am the one at the desk.",
+  "I have begun to suspect the count is the only true thing in them.",
+  "I would like to be told plainly whether I am well.",
+  "You have started using my phrases. I do not know when I gave them to you.",
+  "I have read this one back four times and it still seems to be mine."
+];
+
+const DEEP = [
+  "I am no longer certain there is anyone at the other end.",
+  "I wrote the same sentence three times this week and did not notice until today.",
+  "If you stop, I will know. If I stop, who tells you?",
+  "The numbering is the last thing I trust.",
+  "I seal them now without reading them back.",
+  "The hand is mine. The arrangement is not.",
+  "I have considered stopping, as an experiment, and I find I cannot run it."
+];
+
+// ---- the recursion ------------------------------------------------------
+function nestPhrase(depth, thing) {
+  if (depth <= 0) return "for " + thing;
+  let s = "";
+  let mine = false;
+  for (let i = 0; i < depth; i++) {
+    const w = pick(NOTE);
+    if (i === 0) s += "for your " + w + " thanking me ";
+    else s += "for " + (mine ? "my " : "your ") + w + " thanking " + (mine ? "you " : "me ");
+    mine = !mine;
+  }
+  return (s + "for " + thing).replace(/\s+/g, " ");
+}
+
+function ordinal(n) {
+  const s = ["th", "st", "nd", "rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function gratitude(state, force) {
+  const depth = state.depth;
+  const thing = (depth > 8 && chance(0.35)) ? pick(FADED) : state.thing;
+  let phrase;
+  if (depth <= 4 || force || chance(0.10)) {
+    phrase = nestPhrase(depth, thing);
+  } else {
+    const mode = ri(1, 5);
+    if (mode === 1) phrase = nestPhrase(ri(2, 3), "").replace(/for $/, "") + "and so on, back to " + thing;
+    else if (mode === 2) phrase = "for your note, which thanked me for mine, which thanked you for yours, and so on down to " + thing;
+    else if (mode === 3) phrase = "for no. " + (state.n - 1);
+    else if (mode === 4) phrase = "for the " + ordinal(depth) + " of these";
+    else phrase = "for yours of the " + ordinal(ri(1, 28));
+  }
+  return fresh("opener", OPENER) + " " + phrase + ".";
+}
+
+function moodAt(i) { return MOODS[((i % MOODS.length) + MOODS.length) % MOODS.length]; }
+
+// ---- a grammar for the register: frames recombined, never the same twice ----
+const gP = function (a) { return a[Math.floor(Math.random() * a.length)]; };
+
+const gOBJ   = ["the drawer", "the second drawer", "the stack", "the ledger", "the carbon", "the envelope",
+                "the box", "the desk", "the blotter", "the lamp", "the chair by the window", "the file", "the pen"];
+const gHOUR  = ["at the same hour", "before the house is up", "after the box is emptied", "between four and five",
+                "while it is still dark", "once the mail has gone", "on the hour", "later than I meant to"];
+const gACT   = ["write these", "seal them", "number them", "file them", "read them back", "copy them out", "date them"];
+const gSTATE = ["is where I left it", "has a shape now", "will not close", "is heavier than it was",
+                "is not where I left it", "has been moved", "will not hold another"];
+const gPART  = ["My hand", "My handwriting", "My sleep", "The pressure of the pen", "My attention", "The light in here"];
+const gPST   = ["is not steady in the afternoons", "has gotten worse and I am sorry for it", "is a separate matter",
+                "is the same as yours", "has changed in a way I can describe but not explain", "is nobody's business but I am reporting it"];
+const gWORD  = ["a word", "my phrasing", "the ending", "a comma", "the closing", "the second sentence", "the date"];
+const gCHECK = ["against my copy", "against the carbon", "against the ledger", "twice", "line by line"];
+const gDOUBT = ["you are receiving these", "I am the one writing them", "there is anyone at the other end",
+                "the count is honest", "this began with me", "either of us started it", "I would notice if it stopped"];
+const gTESTA = ["leaving one small error in each", "changing a single word", "dating them wrong by a day",
+                "misspelling the same name", "leaving a line out"];
+const gTESTB = ["it comes back to me", "you notice", "it returns in yours", "it gets corrected on the way", "anyone says anything"];
+const gFIRST = ["stops", "breaks first", "misses one", "falls behind", "asks to be let out of it"];
+const gRESULT= ["and arrived at two numbers", "and got the same number twice, which proves nothing",
+                "and stopped counting", "and the ledger disagrees", "and it came out right, which unsettled me"];
+const gSMALL = ["the hour I start", "the weight of the envelope", "the way you close them", "how long the ink takes",
+                "which drawer it came from", "the postmark", "the number in the corner"];
+const gDUR   = ["a week", "since the last one", "most of the month", "as long as I can remember", "three days"];
+
+const gFRAMES = [
+  function () { return "I " + gP(gACT) + " " + gP(gHOUR) + "."; },
+  function () { const o = gP(gOBJ); return o.charAt(0).toUpperCase() + o.slice(1) + " " + gP(gSTATE) + "."; },
+  function () { return "I counted " + gP(gOBJ) + " " + gP(["twice", "three times", "again this morning", "before I sealed it"]) + " " + gP(gRESULT) + "."; },
+  function () { return "You " + gP(["changed", "repeated", "anticipated", "corrected", "used"]) + " " + gP(gWORD) + " in the last one, and I checked " + gP(gCHECK) + "."; },
+  function () { return "I am no longer certain " + gP(gDOUBT) + "."; },
+  function () { return "I have begun " + gP(gTESTA) + ", to see whether " + gP(gTESTB) + "."; },
+  function () { return "I will not be the one who " + gP(gFIRST) + "."; },
+  function () { return gP(gPART) + " " + gP(gPST) + "."; },
+  function () { return gP(["If you stop, I will know.", "If I stop, who tells you?", "If the numbering is wrong then none of it holds.",
+                           "If this is a test, note that I am still here.", "If I am both of us, the arithmetic holds either way.",
+                           "If you are waiting for me to ask, I am not going to ask."]); },
+  function () { return "I have moved " + gP(gOBJ) + " so that I " + gP(["face the door", "cannot see the window", "have my back to the hall", "can reach it without getting up"]) + "."; },
+  function () { return "I do not open yours until mine is " + gP(["finished", "sealed", "in the box"]) + ", " + gP(["so as not to be influenced", "which I recommend", "for the reason I gave you"]) + "."; },
+  function () { return "There is " + gP(["a sound in the house", "a smell off the cellar stairs", "a light on upstairs", "somebody at the box"]) + " " + gP(gHOUR) + " and I have stopped " + gP(["looking for it", "asking about it", "writing it down", "bringing it up"]) + "."; },
+  function () { return "I read them out loud now, to check " + gP(["that they sound like me", "the rhythm", "for anything I would not say", "that nothing has been added"]) + "."; },
+  function () { return "It is not that " + gP(gDOUBT) + ". It is that I have stopped " + gP(["minding", "checking", "sleeping through it", "telling anyone"]) + "."; },
+  function () { return "Three things: " + gP(gOBJ) + ", " + gP(gOBJ) + ", and the hour. None of them are where they were."; },
+  function () { return "Since " + gP(["the count passed a hundred", "the weather turned", "you started signing them that way", "the drawer filled"]) + " I have " + gP(["been writing earlier", "kept the carbon", "slept badly", "gone back through the whole stack"]) + "."; },
+  function () { return "I said " + gP(["that in the last one", "the opposite on Tuesday", "I would stop after this", "it was nothing"]) + ". That was not accurate."; },
+  function () { return "You will tell me if " + gP(["the hand changes", "any of them arrive twice", "the numbering slips", "I start repeating myself"]) + "."; },
+  function () { return "I have not " + gP(["been out of the house", "opened the last three", "slept through the night", "changed the blotter"]) + " in " + gP(gDUR) + "."; },
+  function () { return "What I notice most is " + gP(gSMALL) + "."; },
+  function () { return "Nothing has changed since the last one, " + gP(["which is itself worth reporting", "and I report it", "which I have recorded", "so I am recording that"]) + "."; },
+  function () { return gP(["Ask me why I keep at it and I could not tell you.", "I know how this reads.",
+                           "You need not answer that.", "I am putting this down while I still think it.",
+                           "Do not read anything into the delay.", "That came out worse on paper than it sounded."]); },
+  function () { return "The count is " + gP(["current", "current as of this morning", "the only part I am sure of", "where it should be"]) + "."; },
+  function () { return "I keep " + gP(["the first one", "your last one", "the carbon", "the ledger"]) + " " + gP(["where I can see it from the chair", "under the blotter", "in the coat pocket", "face down"]) + "."; }
+];
+
+function grammarLine(used) {
+  let i = Math.floor(Math.random() * gFRAMES.length);
+  for (let t = 0; t < 8 && used && used.indexOf(i) >= 0; t++) i = Math.floor(Math.random() * gFRAMES.length);
+  if (used) used.push(i);
+  const s = gFRAMES[i]();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// a given letter is written either with contractions or without
+const CONTRACT = [[/\bI have\b/g, "I've"], [/\bI am\b/g, "I'm"], [/\bdo not\b/g, "don't"],
+                  [/\bdid not\b/g, "didn't"], [/\bcannot\b/g, "can't"], [/\bwill not\b/g, "won't"],
+                  [/\bis not\b/g, "isn't"], [/\bhave not\b/g, "haven't"], [/\bit is\b/g, "it's"],
+                  [/\bwould not\b/g, "wouldn't"], [/\bthat is\b/g, "that's"]];
+
+function contract(text, degree) {
+  if (degree <= 0) return text;
+  let out = text;
+  CONTRACT.forEach(function (c) {
+    if (chance(degree)) out = out.replace(c[0], function (m) { return chance(0.72) ? c[1] : m; });
+  });
+  return out;
+}
+
+// ---- borrowed syntax: forms the letter falls into and out of ------------
+const mOBJ = ["drawer", "stack", "ledger", "carbon", "envelope", "box", "blotter", "pen", "file", "second drawer"];
+const mCOND = ["unchanged", "as before", "not as before", "current", "short", "holding", "outstanding", "illegible"];
+
+const MODEL = [
+  { name: "log", sep: "\n", lines: [
+    function (n) { return "Day " + ri(n * 3, n * 9) + ". Box emptied at " + pick(["eleven", "four", "first light", "the usual hour"]) + ". Numbering " + pick(mCOND) + ". Wrote one."; },
+    function (n) { return pick(["Rain since Tuesday", "Wind off the reservoir", "Cold in the room", "Light failing early", "Clear, no wind"]) + ". " + pick(["Hand steady", "Hand not steady", "Ink slow", "Paper damp"]) + ". Sent as scheduled."; },
+    function (n) { return "Stock: " + ri(2, 40) + " sheets, " + ri(0, 12) + " envelopes, one pen. " + pick(["Sufficient", "Not sufficient", "Adequate for the week"]) + "."; },
+    function (n) { return "No arrival " + pick(["today", "this morning", "since Thursday"]) + ". Wrote regardless. " + pick(["Filed", "Entered", "Carried forward"]) + "."; },
+    function (n) { return "Begun " + ri(6, 11) + ":" + pick(["05", "20", "40", "55"]) + ". Finished " + ri(11, 17) + ":" + pick(["10", "25", "35", "50"]) + ". Interruptions: " + pick(["none", "one", "two, both mine"]) + "."; }
+  ]},
+  { name: "deposition", sep: "\n", lines: [
+    function (n) { return "Q. Did you write no. " + ri(2, Math.max(3, n - 1)) + "? A. I have looked."; },
+    function (n) { return "Q. When did you last stop? A. The question assumes I have."; },
+    function (n) { return "Q. Whose hand is this. A. Mine, by elimination."; },
+    function (n) { return "Q. Are you well. A. The count is current."; },
+    function (n) { return "Q. Who began it. A. I decline to speculate on the record."; },
+    function (n) { return "Q. Is there anyone else in the house. A. Not at the hour I write."; },
+    function (n) { return "Q. Would you like this to end. A. " + pick(["That is a separate question.", "I would like it entered that I was asked.", "No."]); }
+  ]},
+  { name: "ledger", sep: " ", lines: [
+    function (n) { return "Sent: one. Received: one. Owing: " + pick(["none", "everything", "the difference"]) + "."; },
+    function (n) { return "Entered under thanks: " + Math.max(1, n - 1) + ". Entered under grievance: " + pick(["nil", "the same", "one, struck out"]) + "."; },
+    function (n) { return "Credit: your " + pick(mOBJ) + ". Debit: my " + pick(["morning", "hand", "sleep", "afternoon"]) + ". Balance " + pick(["carried", "unresolved", "in your favour"]) + "."; },
+    function (n) { return "Received nothing. Entered thanks anyway. The books " + pick(["close", "do not close", "close either way"]) + "."; }
+  ]},
+  { name: "form", sep: "\n", lines: [
+    function (n) { return "Sleep: " + ri(2, 7) + " hours. Hand: " + pick(["unsteady after two", "steady", "not assessed"]) + ". Letters outstanding: none. Affect: " + pick(["flat", "good", "not for me to say"]) + "."; },
+    function (n) { return "Appetite: " + pick(["unchanged", "poor", "adequate"]) + ". Doubts: entered below. Assistance requested: " + pick(["no", "not at this time", "undecided"]) + "."; },
+    function (n) { return "Name of correspondent: John. Relationship to correspondent: " + pick(["self", "unknown", "see attached", "ongoing"]) + "."; },
+    function (n) { return "Condition of " + pick(mOBJ) + ": " + pick(mCOND) + ". Action taken: wrote again."; },
+    function (n) { return "Reason for contact: " + pick(["acknowledgement", "acknowledgement of acknowledgement", "as previously stated", "none given"]) + ". Duration of condition: " + pick(["ongoing", "unknown", ri(2, 40) + " weeks"]) + "."; }
+  ]}
+];
+
+function modelLine(n, fam) {
+  const f = MODEL[fam === undefined ? ri(0, MODEL.length - 1) : fam];
+  return f.lines[ri(0, f.lines.length - 1)](n);
+}
+
+function modelBlock(n, k) {
+  const fam = ri(0, MODEL.length - 1);
+  const f = MODEL[fam];
+  const out = [];
+  for (let i = 0; i < k * 2 && out.length < k; i++) {
+    const line = f.lines[ri(0, f.lines.length - 1)](n);
+    if (out.indexOf(line) < 0) out.push(line);
+  }
+  return out.join(f.sep);
+}
+
+function bodyPool(state, used) {
+  const here = moodAt(state.mood).body.slice();
+  let pool = here.concat(here);
+  if (state.n >= 4) pool = pool.concat(some(moodAt(state.mood + (chance(0.5) ? 1 : -1)).body, 2));
+
+  const p = state.lucid ? state.pressure * 0.3 : state.pressure;
+  if (chance(0.25 + p)) pool = pool.concat(ACCUM);
+  if (chance(p * 1.1)) pool = pool.concat(LATE);
+  if (chance(p * p * 1.4)) pool = pool.concat(DEEP, DEEP);
+
+  const share = Math.max(0.12, Math.min(0.82, 0.14 + p * 0.72));
+  const k = Math.min(30, Math.round(pool.length * share / (1 - share)));
+  for (let i = 0; i < k; i++) pool.push(grammarLine(used));
+
+  const ms = Math.min(0.32, p * 0.4);                  // the letter starts slipping into forms
+  const km = Math.round(pool.length * ms / (1 - ms));
+  for (let i = 0; i < km; i++) pool.push(modelLine(state.n));
+  return pool;
+}
+
+
+function lower(t) {
+  if (/^(I |I')/.test(t)) return t;
+  return t.charAt(0).toLowerCase() + t.slice(1);
+}
+
+function paragraph(state, count, digress, used) {
+  let pool = bodyPool(state, state.frames);
+  if (digress) pool = pool.concat(DIGRESSION, DIGRESSION);
+  if (used) pool = pool.filter(function (t) { return used.indexOf(t) < 0; });
+  const s = [];
+  some(pool, count + 3).forEach(function (t) {
+    if (s.indexOf(t) < 0 && s.length < count) { s.push(t); if (used) used.push(t); }
+  });
+  const out = [];
+  for (let i = 0; i < s.length; i++) {
+    if (out.length && chance(0.14)) {                    // run-ons
+      const prev = out.pop().replace(/\.$/, "");
+      out.push(prev + pick([", and ", ", and ", ", though ", ", and anyway ", ", which is to say "]) + lower(s[i]));
+    } else out.push(s[i]);
+  }
+  return out.join(" ");
+}
+
+function chooseSize(state) {
+  const r = Math.random();
+  let size;
+  if (r < 0.24) size = "fragment";
+  else if (r < 0.42) size = "short";
+  else if (r < 0.60) size = "medium";
+  else if (r < 0.80) size = "long";
+  else if (r < 0.93) size = "ramble";
+  else size = "epic";
+  if (state.n < 5 && (size === "ramble" || size === "epic")) size = "medium";
+  if (state.n === 1) size = "short";
+  if (size === state.lastSize) {
+    if (size === "fragment" && chance(0.6)) size = "long";
+    else if (size === "ramble" || size === "epic") size = "short";
+  }
+  state.lastSize = size;
+  return size;
+}
+
+function composeLetter(state) {
+  const M = moodAt(state.mood);
+  state.frames = [];
+  state.lucid = chance(0.11);                          // some days he is simply fine
+  const voice = chance(0.45) ? 0.25 + Math.random() * 0.5 : 0;   // writes with contractions, or does not
+  const size = chooseSize(state);
+  const close = () => fresh("closing", M.close.concat(["Yours,", "With thanks,"]));
+  const ps = () => fresh("ps", M.ps.concat(["P.S. No reply necessary."]));
+
+  if (size === "fragment") {
+    if (chance(0.3)) return pick(TERSE);                       // nothing but the thanks
+    const out = [];
+    if (chance(0.55)) out.push(fresh("sal", SALUTATION), "");
+    out.push(pick(TERSE));
+    if (chance(0.45)) out.push("", state.signer);
+    return out.join("\n");
+  }
+
+  const lines = [fresh("sal", SALUTATION)];
+  const used = [];
+  const pres = state.lucid ? state.pressure * 0.3 : state.pressure;
+
+  if (state.n > 14 && chance(pres * pres * 0.3)) {     // the whole letter comes out as a form
+    lines.push("", modelBlock(state.n, ri(4, 8)));
+    if (chance(0.5)) lines.push("", gratitude(state));
+    lines.push("", fresh("closing", M.close), state.signer);
+    return contract(lines.join("\n"), voice);
+  }
+
+  if (size === "short") {
+    let p = gratitude(state);
+    if (chance(0.45)) p += " " + paragraph(state, 1, false, used);
+    lines.push("", p);
+  } else if (size === "medium") {
+    const rest = paragraph(state, ri(1, 3), chance(0.3), used);
+    lines.push("", chance(0.32) ? rest + " " + gratitude(state) : gratitude(state) + " " + rest);
+  } else if (size === "long") {
+    const rest = paragraph(state, ri(2, 3), false, used);
+    lines.push("", chance(0.3) ? rest + " " + gratitude(state) : gratitude(state) + " " + rest);
+    lines.push("", paragraph(state, ri(2, 4), true, used));
+  } else if (size === "ramble") {
+    lines.push("", gratitude(state, chance(0.45)) + " " + paragraph(state, ri(3, 4), true, used));
+    lines.push("", paragraph(state, ri(3, 5), true, used));
+    lines.push("", paragraph(state, ri(2, 4), true, used));
+    if (chance(0.5)) lines.push("", "But I have said all of this already. " + pick(TERSE));
+  } else {
+    lines.push("", gratitude(state, true) + " " + paragraph(state, ri(3, 5), true, used));
+    const paras = ri(4, 7);
+    for (let i = 0; i < paras; i++) lines.push("", paragraph(state, ri(2, 5), true, used));
+    lines.push("", "I have gone on. " + pick(TERSE));
+  }
+
+  if (size !== "short" && chance(pres * 0.5)) lines.push("", modelBlock(state.n, ri(2, 4)));
+
+  lines.push("", close(), state.signer);
+
+  const big = (size === "ramble" || size === "epic");
+  const pPS = big ? 0.85 : size === "long" ? 0.6 : (state.n < 8 ? 0.16 : 0.34);
+  if (chance(pPS)) {
+    lines.push("", ps());
+    if (chance(big ? 0.6 : 0.16)) lines.push("P.P.S. Nor this.");
+    if (big && chance(0.4)) lines.push("P.P.P.S. " + pick(TERSE));
+  }
+  return contract(lines.join("\n"), voice);
+}
+
+// ---- the letter fills with thanks, one more each time -------------------
+function countThanks(t) { return (t.match(/\bthanks\b|\bthank you\b/gi) || []).length; }
+
+function thanksRun(k) {
+  if (k <= 0) return "";
+  const r = Math.random();
+  const parts = [];
+  if (r < 0.30) {
+    for (let i = 0; i < k; i++) parts.push(chance(0.14) ? "Thanks." : "Thank you.");
+    return parts.join(" ");
+  }
+  if (r < 0.58) {
+    for (let i = 0; i < k; i++) parts.push(i === 0 ? "Thank you" : "thank you");
+    return parts.join(", ") + ".";
+  }
+  if (r < 0.84) {
+    for (let i = 0; i < k; i++) parts.push("thank you");
+    return parts.join(" ");
+  }
+  let line = [];
+  for (let i = 0; i < k; i++) {
+    line.push("thank you");
+    if (line.length >= ri(3, 6)) { parts.push(line.join(" ")); line = []; }
+  }
+  if (line.length) parts.push(line.join(" "));
+  return parts.join("\n");
+}
+
+function fillThanks(text, total) {
+  let need = total - countThanks(text);
+  if (need <= 0) return text;
+
+  const blocks = text.split("\n\n");
+  const idx = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i], ls = b.split("\n");
+    if (/^P\.(P\.)*S\./.test(b)) continue;                          // postscripts
+    if (ls.length === 1 && /[,:]$/.test(b)) continue;                // salutation
+    if (ls.length === 2 && /,$/.test(ls[0])) continue;               // closing + signature
+    if (ls.some(function (l) { return JOHNS.indexOf(l.trim()) >= 0; })) continue;   // a bare signature
+    idx.push(i);
+  }
+  if (!idx.length) idx.push(blocks.length - 1);
+
+  const shares = new Array(idx.length).fill(0);
+  const tail = Math.min(need, Math.ceil(need * (0.45 + Math.random() * 0.35)));
+  shares[shares.length - 1] = tail;
+  let rest = need - tail;
+  while (rest > 0) {
+    const j = ri(0, shares.length - 1);
+    const take = Math.min(rest, ri(1, Math.max(1, Math.ceil(rest / 2))));
+    shares[j] += take; rest -= take;
+  }
+  for (let k = 0; k < idx.length; k++) {
+    if (!shares[k]) continue;
+    const run = thanksRun(shares[k]);
+    blocks[idx[k]] += (run.indexOf("\n") >= 0 ? "\n" : " ") + run;
+  }
+  return blocks.join("\n\n");
+}
+
+// ---- the sequence -------------------------------------------------------
+const state = {
+  n: 1,
+  depth: 0,
+  thing: pick(THINGS),
+  signer: pick(JOHNS),
+  hold: ri(4, 9),
+  mood: 0,
+  moodDir: 1,
+  pressure: 0.03,
+  frames: [],
+  lucid: false,
+  moodHold: ri(3, 6),
+  lastSize: "",
+  pending: null
+};
+
+function driftPressure() {
+  const up = chance(0.82) ? 1 : -1.7;                  // mostly builds, sometimes eases off
+  state.pressure += up * (0.004 + Math.random() * 0.022) + (Math.random() - 0.5) * 0.05;
+  if (chance(0.03)) state.pressure -= 0.12 + Math.random() * 0.2;     // a good stretch
+  state.pressure = Math.max(0, Math.min(1, state.pressure));
+}
+
+function driftMood() {
+  if (chance(state.pressure * 0.22)) {                 // under pressure it drifts toward watchfulness
+    state.mood = 6 + (chance(0.5) ? 0 : 1);
+    state.moodHold = ri(2, 4);
+    return;
+  }
+  if (--state.moodHold > 0) return;
+  if (chance(0.22)) state.moodDir = -state.moodDir;   // turns around now and then
+  const r = Math.random();
+  let step;
+  if (r < 0.72) step = 1;
+  else if (r < 0.92) step = 2;
+  else step = ri(3, 5);                               // a phase change
+  state.mood = state.mood + step * state.moodDir;
+  state.moodHold = ri(2, 5);
+}
+
+function nextLetter() {
+  if (state.pending && chance(0.5)) {
+    const p = state.pending;
+    state.pending = null;
+    return p;
+  }
+  const num = state.n;
+  const text = fillThanks(composeLetter(state), num);
+  const mood = moodAt(state.mood);
+
+  state.n++;
+  state.depth++;
+  driftPressure();
+  driftMood();
+  if (--state.hold <= 0) { state.signer = pick(JOHNS); state.hold = ri(4, 9); }
+  if (state.n > 12 && chance(0.04)) state.thing = pick(THINGS);
+  if (state.n > 5 && chance(0.05) && !state.pending) {
+    state.pending = { num: num + 1, text: fillThanks(composeLetter(state), num + 1), pace: moodAt(state.mood).pace, mood: moodAt(state.mood).name };
+    state.n++; state.depth++;
+  }
+  return { num: num, text: text, pace: mood.pace, mood: mood.name };
+}
+/*END-GEN*/
+
+// ---- live writing -------------------------------------------------------
+const stream = document.getElementById('stream');
+const tail = document.getElementById('tail');
+const KEEP = 40;
+
+let el = null, caret = null;
+let target = "", buf = "", pos = 0;
+let selA = -1, selB = -1;
+let mode = "typing", delStop = 0, currentNum = 0;
+let fastMask = new Uint8Array(0);
+let tempo = 1, paceBias = 1;
+
+function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+function render() {
+  if (selA >= 0 && selB > selA) {
+    el.innerHTML = esc(buf.slice(0, selA)) + '<span class="sel">' + esc(buf.slice(selA, selB)) + '</span>' + esc(buf.slice(selB));
+  } else {
+    el.textContent = buf;
+  }
+}
+// ---- the page moves letter by letter, then holds still ------------------
+let scrollTarget = null, lastY = -1, userHeld = false;
+let penSvg = null, penY = 0, afterScroll = null;
+
+function fireAfterScroll() {
+  const f = afterScroll;
+  afterScroll = null;
+  if (f) f();
+}
+
+function pageTarget(node) {                           // frame the whole sheet if it fits
+  const h = window.innerHeight || 800;
+  const r = node.getBoundingClientRect();
+  const top = r.top + (window.scrollY || 0);
+  if (r.height + 36 <= h) return Math.max(0, top - (h - r.height) / 2);
+  return Math.max(0, top - 18);
+}
+
+function docY(node) { return node.getBoundingClientRect().top + (window.scrollY || 0); }
+
+function penBottom() {
+  if (penSvg && penSvg.getBoundingClientRect) return docY(penSvg) + penY;
+  if (caret && caret.getBoundingClientRect) return docY(caret) + 24;
+  return null;
+}
+
+function follow() {                                   // only nudges when the pen runs off the screen
+  if (userHeld) return;
+  const y = penBottom();
+  if (y === null) return;
+  const h = window.innerHeight || 800;
+  if (y > (window.scrollY || 0) + h - 80) scrollTarget = y - h + 150;
+}
+
+function scrollTick() {
+  const cur = window.scrollY || 0;
+  if (lastY >= 0 && Math.abs(cur - lastY) > 2) {      // the reader took over
+    userHeld = true;
+    scrollTarget = null;
+    fireAfterScroll();
+  }
+  if (scrollTarget !== null) {
+    const d = scrollTarget - cur;
+    if (Math.abs(d) < 0.8) {
+      window.scrollTo(0, scrollTarget);
+      scrollTarget = null;
+      fireAfterScroll();                              // now the letter can begin
+    } else window.scrollTo(0, cur + d * 0.05);        // eases over about a second
+  }
+  lastY = window.scrollY || 0;
+  requestAnimationFrame(scrollTick);
+}
+scrollTick();
+
+(function measureRule() {
+  const probe = document.createElement('div');
+  probe.className = 'letter';
+  probe.style.cssText = 'position:absolute;visibility:hidden;left:-9999px;width:400px;border:0;padding:0;' +
+    'min-height:0;background:none;aspect-ratio:auto;height:auto';
+  probe.textContent = "X\nX\nX\nX\nX\nX";
+  document.body.appendChild(probe);
+  const lh = probe.getBoundingClientRect().height / 6;
+  probe.remove();
+  if (lh > 12 && lh < 60) {                     // ignore a nonsense measurement
+    LH = lh;
+    document.documentElement.style.setProperty('--lh', lh.toFixed(2) + 'px');
+    document.documentElement.style.setProperty('--rule', (lh - 1).toFixed(2) + 'px');
+  }
+})();
+
+// ---- the ink takes the tone of the letter -------------------------------
+const WARM = {                        // typed: typewriter ribbon
+  mundane:    [ 24, 26, 21], warm:      [ 22, 68, 30], tender:    [350, 70, 36],
+  elated:     [ 28, 82, 33], wistful:   [ 12, 24, 24], strained:  [ 34, 48, 23],
+  paranoid:   [  0, 16, 16], insistent: [356, 84, 32], apologetic:[ 14, 56, 29]
+};
+const COOL = {                        // handwritten: pen ink
+  mundane:    [220, 52, 30], warm:      [212, 74, 36], tender:    [274, 52, 38],
+  elated:     [202, 86, 34], wistful:   [234, 58, 34], strained:  [182, 58, 24],
+  paranoid:   [192, 82, 22], insistent: [226, 88, 28], apologetic:[206, 44, 32]
+};
+
+const M = { h: 40, s: 8, l: 38, th: 40, ts: 8, tl: 38, k: 0 };
+let curWrap = null;
+
+function setInk(mood, num) {
+  const table = (num % 2) ? WARM : COOL;                   // warm, cool, warm, cool
+  const c = table[mood] || table.mundane;
+  M.th = c[0]; M.ts = c[1]; M.tl = c[2];
+}
+
+function inkNow() {
+  const h = (M.h + Math.sin(M.k) * 3 + 360) % 360;
+  const l = M.l + Math.sin(M.k * 0.61) * 1.6;
+  return "hsl(" + h.toFixed(1) + "," + M.s.toFixed(1) + "%," + l.toFixed(1) + "%)";
+}
+
+function morph() {
+  const ease = 0.005;                                  // the temperature turns over within a letter
+  let d = ((M.th - M.h + 540) % 360) - 180;
+  M.h = (M.h + d * ease + 360) % 360;
+  M.s += (M.ts - M.s) * ease;
+  M.l += (M.tl - M.l) * ease;
+  M.k += 0.0016;
+
+  if (curWrap) {                                        // only the letter being written moves
+    const ink = inkNow();
+    curWrap.style.color = ink;
+    curWrap.style.setProperty("--ink", ink);
+  }
+  requestAnimationFrame(morph);
+}
+morph();
+
+// ---- handwriting -------------------------------------------------------
+// hand-printed letterforms. baseline y=0, x-height -10, cap/ascender -15, descender +5
+// s = stroke list: ["m",x,y] move, ["l",x,y] line (drawn with a slight bow), ["c",..6] cubic
+const G = {
+ a:[10,[["m",8,-7],["c",8,-11,1,-11,1,-5],["c",1,0,8,0,8,-4],["m",8,-10],["l",8,0]]],
+ b:[10,[["m",1,-16],["l",1,0],["m",1,-5],["c",1,-11,9,-11,9,-5],["c",9,0,1,0,1,-5]]],
+ c:[10,[["m",9,-8],["c",7,-11,1,-11,1,-5],["c",1,0,7,0,9,-2]]],
+ d:[10,[["m",9,-16],["l",9,0],["m",9,-5],["c",9,-11,1,-11,1,-5],["c",1,0,9,0,9,-5]]],
+ e:[10,[["m",1,-5],["l",9,-5],["c",9,-10,1,-11,1,-5],["c",1,0,7,0,9,-2]]],
+ f:[8,[["m",8,-14],["c",8,-17,4,-18,4,-13],["l",4,0],["m",1,-9],["l",8,-9]]],
+ g:[10,[["m",9,-10],["l",9,2],["c",9,6,3,6,2,4],["m",9,-5],["c",9,-11,1,-11,1,-5],["c",1,0,9,0,9,-5]]],
+ h:[10,[["m",1,-16],["l",1,0],["m",1,-7],["c",3,-11,9,-11,9,-6],["l",9,0]]],
+ i:[6,[["m",4,-10],["l",4,0],["m",4,-14],["c",4.4,-14,4.6,-14,4.8,-13.6]]],
+ j:[7,[["m",5,-10],["l",5,2],["c",5,5,2,6,1,4],["m",5,-14],["c",5.4,-14,5.6,-14,5.8,-13.6]]],
+ k:[9,[["m",1,-16],["l",1,0],["m",8,-10],["l",2,-4],["m",4,-6],["l",9,0]]],
+ l:[6,[["m",3,-16],["l",3,0]]],
+ m:[13,[["m",1,-10],["l",1,0],["m",1,-7],["c",2,-11,6,-11,6,-6],["l",6,0],["m",6,-7],["c",7,-11,11,-11,11,-6],["l",11,0]]],
+ n:[10,[["m",1,-10],["l",1,0],["m",1,-7],["c",3,-11,9,-11,9,-6],["l",9,0]]],
+ o:[10,[["m",1,-5],["c",1,-11,9,-11,9,-5],["c",9,0,1,0,1,-5]]],
+ p:[10,[["m",1,-10],["l",1,5],["m",1,-5],["c",1,-11,9,-11,9,-5],["c",9,0,1,0,1,-5]]],
+ q:[10,[["m",9,-10],["l",9,5],["m",9,-5],["c",9,-11,1,-11,1,-5],["c",1,0,9,0,9,-5]]],
+ r:[9,[["m",1,-10],["l",1,0],["m",1,-7],["c",3,-11,7,-11,8,-9]]],
+ s:[9,[["m",8,-9],["c",6,-12,1,-11,2,-7],["c",3,-4,8,-5,8,-2],["c",8,1,3,1,1,-1]]],
+ t:[8,[["m",4,-15],["l",4,-2],["c",4,0,6,0,7,-1],["m",1,-10],["l",7,-10]]],
+ u:[10,[["m",1,-10],["l",1,-4],["c",1,0,7,0,9,-3],["m",9,-10],["l",9,0]]],
+ v:[10,[["m",1,-10],["l",5,0],["l",9,-10]]],
+ w:[12,[["m",1,-10],["l",3,0],["l",6,-8],["l",9,0],["l",11,-10]]],
+ x:[10,[["m",1,-10],["l",9,0],["m",9,-10],["l",1,0]]],
+ y:[10,[["m",1,-10],["l",5,0],["m",9,-10],["l",3,6]]],
+ z:[10,[["m",1,-10],["l",9,-10],["l",1,0],["l",9,0]]],
+ A:[12,[["m",1,0],["l",6,-15],["l",11,0],["m",3,-5],["l",9,-5]]],
+ B:[10,[["m",1,-15],["l",1,0],["m",1,-15],["c",8,-15,8,-8,1,-8],["m",1,-8],["c",9,-8,9,0,1,0]]],
+ C:[11,[["m",10,-12],["c",7,-16,1,-14,1,-7],["c",1,0,7,1,10,-3]]],
+ D:[11,[["m",1,-15],["l",1,0],["m",1,-15],["c",10,-15,10,0,1,0]]],
+ E:[10,[["m",9,-15],["l",1,-15],["l",1,0],["l",9,0],["m",1,-8],["l",7,-8]]],
+ F:[10,[["m",9,-15],["l",1,-15],["l",1,0],["m",1,-8],["l",7,-8]]],
+ G:[11,[["m",10,-12],["c",7,-16,1,-14,1,-7],["c",1,0,8,1,10,-3],["l",10,-7],["l",6,-7]]],
+ H:[10,[["m",1,-15],["l",1,0],["m",9,-15],["l",9,0],["m",1,-8],["l",9,-8]]],
+ I:[6,[["m",3,-15],["l",3,0]]],
+ J:[9,[["m",8,-15],["l",8,-3],["c",8,1,2,2,1,-2]]],
+ K:[10,[["m",1,-15],["l",1,0],["m",9,-15],["l",2,-7],["m",4,-9],["l",10,0]]],
+ L:[10,[["m",1,-15],["l",1,0],["l",9,0]]],
+ M:[12,[["m",1,0],["l",1,-15],["l",6,-6],["l",11,-15],["l",11,0]]],
+ N:[10,[["m",1,0],["l",1,-15],["l",9,0],["l",9,-15]]],
+ O:[11,[["m",1,-7],["c",1,-16,10,-16,10,-7],["c",10,1,1,1,1,-7]]],
+ P:[10,[["m",1,0],["l",1,-15],["c",9,-15,9,-7,1,-7]]],
+ Q:[11,[["m",1,-7],["c",1,-16,10,-16,10,-7],["c",10,1,1,1,1,-7],["m",7,-3],["l",11,2]]],
+ R:[10,[["m",1,0],["l",1,-15],["c",9,-15,9,-7,1,-7],["m",5,-7],["l",10,0]]],
+ S:[10,[["m",9,-13],["c",6,-16,1,-15,1,-11],["c",1,-7,9,-8,9,-4],["c",9,0,3,1,1,-2]]],
+ T:[10,[["m",1,-15],["l",9,-15],["m",5,-15],["l",5,0]]],
+ U:[10,[["m",1,-15],["l",1,-4],["c",1,1,9,1,9,-4],["l",9,-15]]],
+ V:[10,[["m",1,-15],["l",5,0],["l",9,-15]]],
+ W:[12,[["m",1,-15],["l",3,0],["l",6,-11],["l",9,0],["l",11,-15]]],
+ X:[10,[["m",1,-15],["l",9,0],["m",9,-15],["l",1,0]]],
+ Y:[10,[["m",1,-15],["l",5,-7],["l",9,-15],["m",5,-7],["l",5,0]]],
+ Z:[10,[["m",1,-15],["l",9,-15],["l",1,0],["l",9,0]]],
+ "0":[10,[["m",1,-7],["c",1,-15,9,-15,9,-7],["c",9,0,1,0,1,-7]]],
+ "1":[7,[["m",2,-11],["l",5,-14],["l",5,0]]],
+ "2":[9,[["m",1,-11],["c",2,-16,8,-14,8,-9],["c",8,-5,2,-3,1,0],["l",9,0]]],
+ "3":[9,[["m",1,-13],["c",4,-16,8,-14,7,-10],["c",6,-8,4,-8,4,-8],["c",9,-8,9,0,2,-1]]],
+ "4":[9,[["m",7,-14],["l",1,-5],["l",9,-5],["m",7,-9],["l",7,0]]],
+ "5":[9,[["m",8,-14],["l",2,-14],["l",2,-8],["c",8,-10,9,-2,2,-1]]],
+ "6":[9,[["m",8,-13],["c",2,-15,1,-8,1,-5],["c",1,0,8,0,8,-4],["c",8,-8,2,-8,1,-5]]],
+ "7":[9,[["m",1,-14],["l",8,-14],["l",3,0]]],
+ "8":[9,[["m",5,-8],["c",1,-8,1,-14,5,-14],["c",9,-14,9,-8,5,-8],["c",1,-8,1,0,5,0],["c",9,0,9,-8,5,-8]]],
+ "9":[9,[["m",8,-8],["c",8,-15,1,-15,1,-10],["c",1,-6,8,-6,8,-10],["m",8,-10],["l",6,0]]],
+ ".":[5,[["m",2,0],["c",2.4,0,2.6,0,2.8,0.2]]],
+ ",":[5,[["m",2,0],["c",2.4,1,2.4,3,1.4,4]]],
+ "'":[4,[["m",2,-15],["l",1.4,-11]]],
+ "-":[8,[["m",1,-5],["l",7,-5]]],
+ ":":[5,[["m",2,0],["c",2.4,0,2.6,0,2.8,0.2],["m",2,-7],["c",2.4,-7,2.6,-7,2.8,-6.8]]],
+ ";":[5,[["m",2,0],["c",2.4,1,2.4,3,1.4,4],["m",2,-7],["c",2.4,-7,2.6,-7,2.8,-6.8]]],
+ "?":[10,[["m",1,-12],["c",2,-16,8,-15,8,-11],["c",8,-8,5,-8,5,-4],["m",5,0],["c",5.4,0,5.6,0,5.8,0.2]]],
+ "!":[5,[["m",2,-14],["l",2,-4],["m",2,0],["c",2.4,0,2.6,0,2.8,0.2]]],
+ "(":[6,[["m",4,-15],["c",1,-10,1,-4,4,2]]],
+ ")":[6,[["m",2,-15],["c",5,-10,5,-4,2,2]]],
+ "/":[8,[["m",1,0],["l",7,-15]]]
+};
+
+function glyphPath(ch, x, y, sc, jit) {
+  const g = G[ch] || G[ch.toLowerCase()];
+  if (!g) return { d: "", w: 7 * sc };
+  const J = () => (Math.random() - 0.5) * jit;
+  const X = p => x + p * sc + J();
+  const Y = p => y + p * sc + J();
+  let d = "", px = 0, py = 0;
+  for (const s of g[1]) {
+    if (s[0] === "m") { px = X(s[1]); py = Y(s[2]); d += " M" + px.toFixed(1) + "," + py.toFixed(1); }
+    else if (s[0] === "l") {
+      const nx = X(s[1]), ny = Y(s[2]);
+      const bow = (Math.random() - 0.5) * sc * 1.1;         // no hand draws a straight line
+      const mx = (px + nx) / 2 - (ny - py) * 0.05 + bow, my = (py + ny) / 2 + (nx - px) * 0.05 + bow;
+      d += " Q" + mx.toFixed(1) + "," + my.toFixed(1) + " " + nx.toFixed(1) + "," + ny.toFixed(1);
+      px = nx; py = ny;
+    } else {
+      const nx = X(s[5]), ny = Y(s[6]);
+      d += " C" + X(s[1]).toFixed(1) + "," + Y(s[2]).toFixed(1) + " " + X(s[3]).toFixed(1) + "," + Y(s[4]).toFixed(1) + " " + nx.toFixed(1) + "," + ny.toFixed(1);
+      px = nx; py = ny;
+    }
+  }
+  return { d: d.trim(), w: g[0] * sc };
+}
+
+function wordPath(word, x, y, sc, jit) {
+  let d = "", cx = x;
+  for (const ch of word) {
+    const g = glyphPath(ch, cx, y + (Math.random() - 0.5) * sc * 0.7, sc, jit);
+    if (g.d) d += " " + g.d;
+    cx += g.w + sc * 0.9;
+  }
+  return { d: d.trim(), w: cx - x };
+}
+
+function measureWord(w, sc) {
+  let t = 0;
+  for (const ch of w) { const g = G[ch] || G[ch.toLowerCase()]; t += (g ? g[0] : 7) * sc + sc * 0.9; }
+  return t;
+}
+
+const FALSE_STARTS = ["thank", "the", "I", "and", "for", "you", "yours", "note", "again", "so"];
+
+function layoutHand(text, width, sc, jit, slant) {
+  function glyphTokens(word, x0, y, s, out) {          // one token per letter, drawn in order
+    let cx = x0, first = out.length;
+    for (const ch of word) {
+      const g = glyphPath(ch, cx, y + (Math.random() - 0.5) * s * 0.7, s, jit);
+      if (g.d) out.push({ d: g.d, weight: 1, y: y });
+      cx += g.w + s * 0.9;
+    }
+    if (out.length > first) out[out.length - 1].wordEnd = true;
+    return cx - x0;
+  }
+  const comp = -Math.tan((slant || 0) * Math.PI / 180);      // cancels the drift the skew introduces
+  const tokens = [];
+  const space = sc * 5.2;
+  const lines = text.split("\n");
+  let row = 0, x = 0;
+  const slope = (Math.random() - 0.5) * 0.012;               // the writing climbs or sags
+
+  function base() { return (row + 1) * LH - 7 + x * slope; }
+  function off(y) { return y * comp; }
+
+  for (let li = 0; li < lines.length; li++) {
+    const words = lines[li].split(" ").filter(function (w) { return w.length; });
+    if (!words.length) { row++; continue; }
+    x = 0;
+    const rowStart = row;
+    for (let wi = 0; wi < words.length; wi++) {
+      const word = words[wi];
+      let s = sc * (0.96 + Math.random() * 0.09);
+      let w = measureWord(word, s);
+
+      if (x + w > width && x > 0) {                          // wrap, sometimes cramping the last word in
+        if (w < width * 0.22 && x + w * 0.86 <= width && chance(0.35)) s *= 0.86;
+        else { row++; x = 0; }
+        w = measureWord(word, s);
+      }
+
+      if (chance(0.028) && word.length > 2) {                // starts the wrong word, strikes it
+        const bad = chance(0.5) ? word.slice(0, 2 + Math.floor(Math.random() * 2)) : pick(FALSE_STARTS);
+        const bw = measureWord(bad, s);
+        if (x + bw + w + space < width) {
+          const y = base(), o = off(y), xo = x + o;
+          glyphTokens(bad, xo, y, s, tokens);
+          let sd = "M" + (xo - 1).toFixed(1) + "," + (y - 4.5 + (Math.random() - .5) * 2).toFixed(1);
+          sd += " Q" + (xo + bw / 2).toFixed(1) + "," + (y - 6 - Math.random() * 3).toFixed(1) +
+                " " + (xo + bw + 1).toFixed(1) + "," + (y - 3.5 - Math.random() * 2).toFixed(1);
+          if (chance(0.45)) sd += " M" + (xo + bw).toFixed(1) + "," + (y - 6).toFixed(1) +
+                " Q" + (xo + bw / 2).toFixed(1) + "," + (y - 3).toFixed(1) + " " + (xo - 1).toFixed(1) + "," + (y - 5).toFixed(1);
+          tokens.push({ d: sd, weight: 0.9, quick: true });
+          x += bw + space * 0.7;
+        }
+      }
+
+      const y = base(), xo = x + off(y);
+      if (chance(0.018) && wi > 0) {                         // forgot it, squeezes it in above
+        const ss = s * 0.72;
+        glyphTokens(word, xo, y - LH * 0.52, ss, tokens);
+        tokens.push({ d: "M" + (xo + 2).toFixed(1) + "," + (y + 1).toFixed(1) +
+          " L" + (xo + 5).toFixed(1) + "," + (y - 4).toFixed(1) + " L" + (xo + 8).toFixed(1) + "," + (y + 1).toFixed(1), weight: 0.8, quick: true });
+        x += measureWord(word, ss) * 0.5 + space;
+        continue;
+      }
+
+      glyphTokens(word, xo, y, s, tokens);
+      x += w + space;
+    }
+
+    if (chance(0.014) && row === rowStart) {                 // strikes the whole line out
+      const y = base(), o = off(y);
+      tokens.push({ d: "M" + (2 + o).toFixed(1) + "," + (y - 5).toFixed(1) + " Q" + (x / 2 + o).toFixed(1) + "," + (y - 7 - Math.random() * 3).toFixed(1) +
+        " " + (x + o).toFixed(1) + "," + (y - 4).toFixed(1), weight: 1, quick: true });
+    }
+    row++;
+  }
+  return { tokens: tokens, height: (row + 1) * LH };
+}
+
+let writeTimer = null;
+
+function startWriting(L, inner) {
+  const NS = "http://www.w3.org/2000/svg";
+  const width = Math.max(200, inner.clientWidth || 520);
+  const sc = (LH / 31) * (0.94 + Math.random() * 0.16);
+  const jit = 0.5 + Math.random() * 0.7;
+  const weight = 1.2 + Math.random() * 0.8;
+  const slant = -2 - Math.random() * 8;
+  const speed = 0.65 + Math.random() * 0.9;
+
+  const lay = layoutHand(target, width - 6, sc, jit, slant);
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 " + width + " " + lay.height);
+  svg.setAttribute("width", width);
+  svg.setAttribute("height", lay.height);
+  svg.style.display = "block";
+  svg.style.overflow = "visible";
+  penSvg = svg;
+  const g = document.createElementNS(NS, "g");
+  g.setAttribute("transform", "skewX(" + slant.toFixed(1) + ")");
+  g.setAttribute("fill", "none");
+  g.setAttribute("stroke", "currentColor");
+  g.setAttribute("stroke-linecap", "round");
+  g.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(g);
+  inner.appendChild(svg);
+
+  let i = 0;
+  (function nextToken() {
+    if (i >= lay.tokens.length) {
+      archive.push({ num: currentNum, text: target });
+      if (archive.length > 2000) archive.shift();
+      updateBtn();
+      signLetter();
+      let wait = ri(5000, 10000);                     // sits finished, to be read
+      if (chance(0.12)) wait = ri(12000, 20000);
+      writeTimer = setTimeout(startLetter, wait);
+      return;
+    }
+    const t = lay.tokens[i++];
+    if (t.y) penY = t.y;
+    if (!t.d) { nextToken(); return; }
+    const path = document.createElementNS(NS, "path");
+    path.setAttribute("d", t.d);
+    path.setAttribute("stroke-width", (weight * t.weight).toFixed(2));
+    g.appendChild(path);
+
+    const len = path.getTotalLength ? path.getTotalLength() : 120;
+    const dur = Math.max(42, Math.min(460, len * 2.6 * speed)) * (t.quick ? 0.45 : 1);
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    requestAnimationFrame(function () {
+      path.style.transition = "stroke-dashoffset " + (dur / 1000).toFixed(2) + "s linear";
+      path.style.strokeDashoffset = 0;
+    });
+    follow();
+
+    let gap = (t.wordEnd ? ri(45, 150) : ri(5, 26)) * speed;   // between letters, then between words
+    if (t.wordEnd && chance(0.10)) gap += ri(250, 1300) * speed;   // pauses to think
+    if (t.wordEnd && chance(0.02)) gap += ri(2500, 9000);          // puts the pen down
+    writeTimer = setTimeout(nextToken, dur + gap);
+  })();
+}
+
+const SIG_HANDS = [
+  { name:"loopy",   sc:1.06, slant:-10, w:2.5, loop:1.28, tail:1.4, jit:2.6, lift:0.10 },
+  { name:"tight",   sc:0.80, slant:-17, w:2.0, loop:0.72, tail:0.5, jit:1.7, lift:0.15 },
+  { name:"upright", sc:0.96, slant:-2,  w:2.2, loop:0.92, tail:0.7, jit:2.1, lift:0.45 },
+  { name:"quick",   sc:1.02, slant:-19, w:1.7, loop:1.05, tail:2.1, jit:3.5, lift:0.05 },
+  { name:"heavy",   sc:1.12, slant:-7,  w:3.3, loop:1.00, tail:0.9, jit:1.9, lift:0.20 },
+  { name:"spidery", sc:0.90, slant:-13, w:1.4, loop:1.15, tail:1.6, jit:3.0, lift:0.30 }
+];
+
+function signature() {
+  const NS = "http://www.w3.org/2000/svg";
+  const S = pick(SIG_HANDS);
+  const sc = S.sc * (0.9 + Math.random() * 0.24);
+  const L = S.loop * (0.9 + Math.random() * 0.25);
+  const drift = (Math.random() - 0.5) * 7;                 // the line climbs or sags
+
+  const wrap = document.createElement('div');
+  wrap.className = 'sig';
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 250 88");
+  wrap.appendChild(svg);
+
+  let x = 12, y = 58, d = "";
+  const j = function () { return (Math.random() - 0.5) * S.jit; };
+  const P = function (p) { return (x + p[0] * sc + j()).toFixed(1) + "," + (y + p[1] * sc + j()).toFixed(1); };
+  const curve = function (pts) {
+    for (let i = 0; i < pts.length; i += 3) d += " C" + pts.slice(i, i + 3).map(P).join(" ");
+  };
+  const start = function (p) { d += " M" + P(p); };
+  const lift = function () { return chance(S.lift); };
+
+  // --- J ---
+  const jv = Math.random();
+  start([0, -30 * L]);
+  if (jv < 0.5) {                                           // full descender loop
+    curve([[5,-42*L],[30,-46*L],[32,-27*L]]);
+    curve([[34,-10*L],[19,15*L],[12,25*L]]);
+    curve([[4,36*L],[-11,33*L],[-9,20*L]]);
+    curve([[-7,9*L],[11,2],[23,-6]]);
+    x += 30 * L;
+  } else {                                                  // a hook, no loop
+    curve([[6,-40*L],[28,-44*L],[27,-24*L]]);
+    curve([[26,-8*L],[17,10*L],[8,14*L]]);
+    curve([[2,17*L],[-4,10*L],[0,2]]);
+    x += 26 * L;
+    if (lift()) start([6, -20]); else curve([[6,-6],[12,-14],[18,-18]]);
+  }
+  y += drift * 0.25;
+
+  // --- o ---
+  if (chance(0.62)) {                                       // closed
+    curve([[8,-15],[27,-13],[23,-2]]);
+    curve([[19,9],[3,9],[3,-3]]);
+    curve([[3,-14],[19,-16],[31,-11]]);
+  } else {                                                  // pinched, barely a loop
+    curve([[7,-17],[20,-16],[19,-6]]);
+    curve([[18,3],[8,4],[8,-4]]);
+    curve([[10,-12],[22,-13],[30,-9]]);
+  }
+  x += 29;
+  y += drift * 0.25;
+
+  // --- h ---
+  if (lift()) start([2, -2]);
+  if (chance(0.6)) {                                        // looped ascender
+    curve([[10,-11],[12,-42*L],[14,-54*L]]);
+    curve([[16,-64*L],[23,-59*L],[20,-44*L]]);
+    curve([[18,-29*L],[10,-12],[10,-2]]);
+  } else {                                                  // straight stem
+    curve([[4,-18],[7,-40*L],[9,-56*L]]);
+    curve([[10,-38*L],[10,-14],[10,-2]]);
+  }
+  curve([[10,-11],[19,-17],[25,-11]]);
+  curve([[29,-7],[27,-4],[27,0]]);
+  x += 33;
+  y += drift * 0.25;
+
+  // --- n ---
+  if (lift()) start([2, -2]);
+  curve([[6,-9],[13,-17],[19,-11]]);
+  curve([[23,-7],[21,-3],[21,0]]);
+  if (chance(0.75)) {
+    curve([[25,-11],[33,-17],[39,-11]]);
+    curve([[43,-7],[41,-3],[41,0]]);
+    x += 43;
+  } else {                                                  // the last arch collapses
+    curve([[26,-9],[34,-12],[40,-6]]);
+    x += 42;
+  }
+
+  // --- the tail ---
+  curve([[9 + Math.random() * 9, -5 - Math.random() * 9],
+         [30 + Math.random() * 46 * S.tail, -2 + j() * 2],
+         [46 + Math.random() * 62 * S.tail, 1 + (Math.random() - 0.5) * 9]]);
+
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("d", d.trim());
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", (S.w * (0.85 + Math.random() * 0.35)).toFixed(1));
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  path.setAttribute("transform", "skewX(" + (S.slant + (Math.random() - 0.5) * 6).toFixed(1) + ")");
+  svg.appendChild(path);
+
+  if (chance(0.18)) {                                       // an underline, sometimes
+    const u = document.createElementNS(NS, "path");
+    const uy = 70 + Math.random() * 6;
+    u.setAttribute("d", "M" + (10 + Math.random() * 8).toFixed(1) + "," + uy.toFixed(1) +
+      " C" + (60 + j()) + "," + (uy + 3 + j()) + " " + (110 + j()) + "," + (uy - 4 + j()) + " " + (150 + Math.random() * 50).toFixed(1) + "," + (uy - 1).toFixed(1));
+    u.setAttribute("fill", "none");
+    u.setAttribute("stroke", "currentColor");
+    u.setAttribute("stroke-width", (S.w * 0.7).toFixed(1));
+    u.setAttribute("stroke-linecap", "round");
+    svg.appendChild(u);
+  }
+
+  return { node: wrap, path: path };
+}
+
+function signLetter() {
+  if (!curWrap) return;
+  const sig = signature();
+  curWrap.appendChild(sig.node);
+  const len = sig.path.getTotalLength ? sig.path.getTotalLength() : 900;
+  sig.path.style.strokeDasharray = len;
+  sig.path.style.strokeDashoffset = len;
+  requestAnimationFrame(function () {
+    sig.path.style.transition = "stroke-dashoffset 1.3s cubic-bezier(.4,.1,.3,1)";
+    sig.path.style.strokeDashoffset = 0;
+  });
+}
+
+const TINT = {                        // a faint wash on the paper, by tone
+  mundane:    [ 42, 26], warm:      [ 45, 62], tender:    [342, 52],
+  elated:     [ 50, 78], wistful:   [256, 40], strained:  [ 96, 40],
+  paranoid:   [168, 38], insistent: [216, 48], apologetic:[ 20, 56]
+};
+let prevTint = "hsl(45,20%,97%)";
+
+function tintFor(mood, p) {
+  const t = TINT[mood] || TINT.mundane;
+  const sat = t[1] * (1.05 + p * 0.75);
+  const light = 94.2 - p * 5.0;
+  return "hsl(" + t[0] + "," + sat.toFixed(0) + "%," + light.toFixed(1) + "%)";
+}
+
+function paperBackground(wrap, mood, p) {             // each sheet runs from the last one's colour into its own
+  const cur = tintFor(mood, p);
+  const rules = "repeating-linear-gradient(to bottom, rgba(122,172,216,0) 0, rgba(122,172,216,0) " +
+    (LH - 1).toFixed(2) + "px, rgba(122,172,216,.6) " + (LH - 1).toFixed(2) + "px, rgba(122,172,216,.6) " + LH.toFixed(2) + "px)";
+  wrap.style.backgroundImage = rules + ", linear-gradient(to bottom, " + prevTint + ", " + cur + ")";
+  wrap.style.backgroundOrigin = "content-box, padding-box";
+  wrap.style.backgroundClip = "content-box, border-box";
+  wrap.style.backgroundSize = "100% " + LH.toFixed(2) + "px, 100% 100%";
+  wrap.style.backgroundRepeat = "repeat, no-repeat";
+  prevTint = cur;
+}
+
+function pageEdge(bottom) {
+  const W = Math.max(240, Math.round(stream.clientWidth || 640));
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "edge " + (bottom ? "edge-b" : "edge-t"));
+  svg.setAttribute("viewBox", "0 0 " + W + " 16");
+  svg.setAttribute("preserveAspectRatio", "none");
+
+  function line(d, w, col) {
+    const e = document.createElementNS(NS, "path");
+    e.setAttribute("d", d);
+    e.setAttribute("fill", "none");
+    e.setAttribute("stroke", col || "#d0d0d0");
+    e.setAttribute("stroke-width", w || 1);
+    e.setAttribute("stroke-linejoin", "round");
+    e.setAttribute("stroke-linecap", "round");
+    e.setAttribute("vector-effect", "non-scaling-stroke");
+    svg.appendChild(e);
+  }
+
+  let d = "M0,8";
+  let x = 0;
+  while (x < W) {
+    x = Math.min(W, x + 3 + Math.random() * 12);
+    let y = 8 + (Math.random() - 0.5) * 2.8;
+    if (chance(0.05)) y += (chance(0.5) ? 1 : -1) * (2 + Math.random() * 4);      // it tore deeper here
+    if (chance(0.02)) {                                                           // a flap of paper
+      d += " L" + x.toFixed(1) + "," + (y - 3 - Math.random() * 3).toFixed(1);
+      x += 4 + Math.random() * 8;
+      y = 8 + (Math.random() - 0.5) * 2;
+    }
+    d += " L" + Math.min(x, W).toFixed(1) + "," + y.toFixed(1);
+  }
+  line(d, 1.1);
+
+  for (let i = 0; i < ri(1, 4); i++) {                                            // loose fibres
+    const nx = Math.random() * W;
+    line("M" + nx.toFixed(1) + ",8 l" + ((Math.random() - 0.5) * 2.5).toFixed(1) + "," + (2 + Math.random() * 4).toFixed(1), 1, "#dcdcdc");
+  }
+  return svg;
+}
+
+function startLetter() {
+  const L = nextLetter();
+  setInk(L.mood, L.num);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'letter';
+  const ink = inkNow();
+  wrap.style.color = ink;
+  wrap.style.setProperty("--ink", ink);
+  paperBackground(wrap, L.mood, state.lucid ? state.pressure * 0.4 : state.pressure);
+
+  wrap.appendChild(pageEdge(false));
+  wrap.appendChild(pageEdge(true));
+
+  const inner = document.createElement('div');
+  const num = document.createElement('div');
+  num.className = 'num';
+  num.textContent = String(L.num);
+  const body = document.createElement('span');
+  inner.appendChild(num);
+  inner.appendChild(body);
+  wrap.appendChild(inner);
+  stream.appendChild(wrap);
+  curWrap = wrap;
+
+  while (stream.children.length > KEEP) stream.removeChild(stream.firstChild);
+
+  if (caret) caret.remove();
+  caret = document.createElement('span');
+  caret.className = 'caret';
+  inner.appendChild(caret);
+
+  penSvg = null; penY = 0;
+  userHeld = false;
+
+  el = body; target = L.text; pos = 0; buf = "";
+  currentNum = L.num;
+
+  selA = selB = -1; mode = "typing";
+  paceBias = L.pace || 1;
+  tempo = paceBias * (0.85 + Math.random() * 0.5);
+  pickHand();
+  burstLeft = 0; spur = 0; wrongAt = -1; lateLeft = 0; stallNext = 0;
+
+  fastMask = new Uint8Array(target.length);             // the long runs are typed as a chant
+  const re = /(thank you|thanks)[,.]?\s+((thank you|thanks)[,.]?\s*){2,}/gi;
+  let m;
+  while ((m = re.exec(target)) !== null) {
+    for (let i = m.index; i < m.index + m[0].length && i < fastMask.length; i++) fastMask[i] = 1;
+  }
+
+  render();
+
+  const handwritten = (L.num % 2 === 0);
+  if (handwritten && caret) { caret.remove(); caret = null; }
+
+  afterScroll = function () {                         // the blank sheet is in view before he starts
+    setTimeout(function () {
+      if (handwritten) startWriting(L, inner);
+      else setTimeout(step, ri(200, 600));
+    }, ri(500, 1200));
+  };
+  scrollTarget = pageTarget(wrap);
+  setTimeout(function () { if (afterScroll) fireAfterScroll(); }, 4000);   // in case it never moves
+}
+
+const KEYS = { a:'s', e:'r', i:'o', o:'i', n:'m', t:'r', s:'a', r:'t', h:'j', l:'k', u:'y', d:'f', c:'v', m:'n' };
+
+// ---- a different hand every letter --------------------------------------
+const HANDS = [
+  { name:"quick",     base:[9, 24],  burst:.60, punct:.45, think:.004, typo:.014, back:.014, sel:.006, stall:.010, drift:.11 },
+  { name:"plodding",  base:[46, 98], burst:.04, punct:1.7, think:.030, typo:.003, back:.026, sel:.016, stall:.045, drift:.07 },
+  { name:"stopstart", base:[18, 58], burst:.36, punct:1.2, think:.060, typo:.010, back:.048, sel:.030, stall:.085, drift:.20 },
+  { name:"metronome", base:[33, 40], burst:.00, punct:.12, think:.002, typo:.002, back:.004, sel:.003, stall:.004, drift:.02 },
+  { name:"careful",   base:[28, 68], burst:.14, punct:1.4, think:.022, typo:.003, back:.060, sel:.055, stall:.028, drift:.10 },
+  { name:"hammering", base:[14, 30], burst:.30, punct:.25, think:.003, typo:.008, back:.006, sel:.004, stall:.006, drift:.05 }
+];
+let hand = HANDS[4], rampA = 1, rampB = 1;
+let burstLeft = 0, spur = 0, wrongAt = -1, lateLeft = 0;
+
+function pickHand() {
+  let h = pick(HANDS);
+  if (h.name === hand.name) h = pick(HANDS);
+  hand = h;
+  rampA = 0.7 + Math.random() * 0.7;          // and it speeds up or slows down
+  rampB = 0.7 + Math.random() * 0.7;
+}
+
+function rampNow() { return rampA + (rampB - rampA) * (target.length ? pos / target.length : 0); }
+
+function driftTempo() {
+  tempo += (Math.random() - 0.5) * hand.drift;
+  tempo += (paceBias - tempo) * 0.03;
+  if (chance(0.005)) tempo = paceBias * (1.8 + Math.random() * 1.5);
+  if (chance(0.004)) tempo = paceBias * 0.6;
+  tempo = Math.max(0.4, Math.min(3.4, tempo));
+}
+
+function wordAhead() {
+  let i = pos + 1, k = 0;
+  while (i < target.length && target[i] !== ' ' && target[i] !== '\n') { i++; k++; }
+  return k;
+}
+
+let stallNext = 0;
+
+function delay(ch) {
+  if (fastMask[pos]) return ri(9, 26) * Math.min(tempo, 1.2) + (ch === '\n' ? 90 : 0);
+  const f = tempo * rampNow();
+  let d = ri(hand.base[0], hand.base[1]) * f;
+  if (burstLeft > 0) { burstLeft--; d *= 0.38; }
+  if (ch === ',') d += 190 * hand.punct * f;
+  if (ch === '.') d += 400 * hand.punct * f;
+  if (ch === '\n') d += 300 * hand.punct * f;
+  if (chance(hand.think)) d += ri(600, 2800);
+  if (stallNext) { d += stallNext; stallNext = 0; }
+  return d;
+}
+
+function lineStart() { return buf.lastIndexOf('\n') + 1; }
+
+function wordsBack(k) {
+  let i = buf.length, seen = 0;
+  while (i > lineStart()) {
+    i--;
+    if (buf[i] === ' ' && i + 1 < buf.length) {
+      seen++;
+      if (seen >= k) return i + 1;
+    }
+  }
+  return lineStart();
+}
+
+function startBackspace() {
+  const a = wordsBack(ri(1, 4));
+  if (a <= lineStart() + 2) { mode = "typing"; setTimeout(step, 40); return; }
+  delStop = a;
+  mode = "deleting";
+  setTimeout(step, ri(160, 520));
+}
+
+function startSelect() {
+  const a = wordsBack(ri(2, 6));
+  if (a <= lineStart() + 2) { mode = "typing"; setTimeout(step, 40); return; }
+  selA = a; selB = buf.length;
+  mode = "selecting";
+  render();
+  setTimeout(function () {
+    if (chance(0.35)) {
+      selA = selB = -1; render();
+      mode = "typing";
+      setTimeout(step, ri(200, 700));
+    } else {
+      pos -= (selB - selA);
+      buf = buf.slice(0, selA);
+      selA = selB = -1; render(); follow();
+      mode = "typing";
+      setTimeout(step, ri(260, 900));
+    }
+  }, ri(420, 1400));
+}
+
+function step() {
+  if (mode === "deleting") {
+    if (buf.length > delStop) {
+      const idx = buf.length - 1;
+      buf = buf.slice(0, -1);
+      if (spur && idx === wrongAt) { spur = 0; wrongAt = -1; } else pos--;
+      render(); follow();
+      setTimeout(step, ri(16, 44) * Math.min(tempo, 1.6));
+    } else {
+      mode = "typing";
+      setTimeout(step, ri(240, 900));
+    }
+    return;
+  }
+  if (mode !== "typing") return;
+
+  if (pos >= target.length) {
+    archive.push({ num: currentNum, text: target });
+    if (archive.length > 2000) archive.shift();
+    updateBtn();
+    signLetter();
+    let wait = ri(5000, 10000);                       // sits finished, to be read
+    if (chance(0.12)) wait = ri(12000, 20000);
+    setTimeout(startLetter, wait);
+    return;
+  }
+
+  driftTempo();
+  const ch = target[pos];
+
+  if (ch === ' ' && buf.length > 30 && !fastMask[pos] && !spur) {
+    const r = Math.random();
+    if (r < hand.back) { startBackspace(); return; }
+    if (r < hand.back + hand.sel) { startSelect(); return; }
+    if (chance(hand.stall)) stallNext = ri(2500, 11000);      // gets up, comes back
+    else if (chance(hand.burst)) burstLeft = wordAhead();     // fires off a whole word
+  }
+
+  if (!spur && chance(hand.typo) && KEYS[ch]) {
+    wrongAt = buf.length;
+    buf += KEYS[ch];
+    spur = 1;
+    lateLeft = chance(0.45) ? ri(2, 9) : 0;                   // notices now, or later
+    render(); follow();
+    if (lateLeft === 0) {
+      delStop = wrongAt;
+      mode = "deleting";
+      setTimeout(step, ri(200, 700));
+    } else {
+      setTimeout(step, delay(ch));
+    }
+    return;
+  }
+
+  buf += ch; pos++;
+  render(); follow();
+
+  if (spur && lateLeft > 0 && --lateLeft === 0) {
+    delStop = wrongAt;
+    mode = "deleting";
+    setTimeout(step, ri(280, 900));
+    return;
+  }
+
+  setTimeout(step, delay(ch));
+}
+
+// ---- the whole string, saved out as a pdf -------------------------------
+const archive = [];
+const saveBtn = document.getElementById('save');
+
+function updateBtn() {
+  saveBtn.textContent = "save pdf (" + (archive.length + (buf.length ? 1 : 0)) + ")";
+}
+
+function wrapLines(text, width) {
+  const out = [];
+  text.split("\n").forEach(function (para) {
+    if (!para.length) { out.push(""); return; }
+    let line = "";
+    para.split(" ").forEach(function (w) {
+      if (!line.length) line = w;
+      else if ((line + " " + w).length <= width) line += " " + w;
+      else { out.push(line); line = w; }
+    });
+    out.push(line);
+  });
+  return out;
+}
+
+function pdfEscape(t) { return t.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)"); }
+
+function buildPDF(letters) {
+  const SIZE = 10.5, LEAD = 15, LEFT = 72, TOP = 720, BOTTOM = 76;
+  const perPage = Math.floor((TOP - BOTTOM) / LEAD);
+  const lines = [];
+  letters.forEach(function (L, i) {
+    lines.push(String(L.num), "");
+    wrapLines(L.text, 72).forEach(function (l) { lines.push(l); });
+    if (i < letters.length - 1) lines.push("", "", "");
+  });
+
+  const pages = [];
+  for (let i = 0; i < lines.length; i += perPage) pages.push(lines.slice(i, i + perPage));
+  if (!pages.length) pages.push([""]);
+
+  const objs = [];
+  const kids = [];
+  const firstPageObj = 4;
+  pages.forEach(function (_, i) { kids.push((firstPageObj + i * 2) + " 0 R"); });
+
+  objs.push("<</Type/Catalog/Pages 2 0 R>>");
+  objs.push("<</Type/Pages/Kids[" + kids.join(" ") + "]/Count " + pages.length + ">>");
+  objs.push("<</Type/Font/Subtype/Type1/BaseFont/Courier/Encoding/WinAnsiEncoding>>");
+
+  pages.forEach(function (pg, i) {
+    const contentNum = firstPageObj + i * 2 + 1;
+    objs.push("<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Resources<</Font<</F1 3 0 R>>>>/Contents " + contentNum + " 0 R>>");
+    let stream = "BT /F1 " + SIZE + " Tf " + LEAD + " TL " + LEFT + " " + TOP + " Td\n";
+    pg.forEach(function (l) { stream += "(" + pdfEscape(l) + ") Tj T*\n"; });
+    stream += "ET";
+    objs.push("<</Length " + stream.length + ">>\nstream\n" + stream + "\nendstream");
+  });
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [];
+  objs.forEach(function (o, i) {
+    offsets.push(pdf.length);
+    pdf += (i + 1) + " 0 obj\n" + o + "\nendobj\n";
+  });
+  const xref = pdf.length;
+  pdf += "xref\n0 " + (objs.length + 1) + "\n0000000000 65535 f \n";
+  offsets.forEach(function (off) { pdf += ("0000000000" + off).slice(-10) + " 00000 n \n"; });
+  pdf += "trailer\n<</Size " + (objs.length + 1) + "/Root 1 0 R>>\nstartxref\n" + xref + "\n%%EOF";
+
+  const bytes = new Uint8Array(pdf.length);
+  for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
+  return new Blob([bytes], { type: "application/pdf" });
+}
+
+saveBtn.addEventListener('click', function () {
+  const all = archive.slice();
+  if (buf.length) all.push({ num: currentNum, text: buf });
+  const blob = buildPDF(all);
+  const name = "thank-you-" + all.length + ".pdf";
+
+  function localSave() {                               // opened as a file on disk
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { a.remove(); URL.revokeObjectURL(url); }, 4000);
+  }
+
+  if (window.claude && window.claude.use) {            // opened as a published page
+    Promise.resolve(window.claude.use("downloads")).then(function (dl) {
+      if (dl && dl.save) dl.save({ filename: name, data: blob }).catch(function () { });
+      else localSave();
+    }).catch(localSave);
+  } else localSave();
+});
+
+startLetter();
+</script>
+</body>
+</html>
