@@ -68,7 +68,7 @@
     width: 90%;
     max-width: 1000px;
     position: relative;
-    line-height: 1.5; 
+    line-height: 1.2; 
     transition: letter-spacing 4s ease;
   }
 
@@ -245,105 +245,39 @@
 
 <script>
   const lexicon = {
-    subject1: [
-      { w: "John", l: 0 }, { w: "the boy", l: 1 }, { w: "the youth", l: 2 }, { w: "the golden child", l: 3 }, { w: "the survivor", l: 4 }, { w: "the ancestor", l: 5 }, { w: "the firstborn", l: 6 }, { w: "the hominid", l: 7 }, { w: "the carbon-form", l: 8 }, { w: "the doomed meat-sack", l: 9 }, { w: "the space-toddler", l: 10 }, { w: "the anomaly", l: 11 }
-    ],
-    subject2: [
-      { w: "His mom", l: 0 }, { w: "his mother", l: 1 }, { w: "the parent", l: 2 }, { w: "the caretaker", l: 3 }, { w: "the matriarch", l: 4 }, { w: "the mother goddess", l: 5 }, { w: "the creator", l: 6 }, { w: "the genetic source", l: 7 }, { w: "the progenitor", l: 8 }, { w: "the oppressive overseer", l: 9 }, { w: "the cosmic minivan driver", l: 10 }, { w: "the architect", l: 11 }
-    ],
-    subject3: [
-      { w: "Matt", l: 0 }, { w: "his friend", l: 1 }, { w: "his shadow", l: 2 }, { w: "the companion", l: 3 }, { w: "the sworn brother", l: 4 }, { w: "the twin soul", l: 5 }, { w: "the betrayer", l: 6 }, { w: "the rival ape", l: 7 }, { w: "the parasitic organism", l: 8 }, { w: "the void-dweller", l: 9 }, { w: "the guy who owes him five bucks", l: 10 }, { w: "the quantum entanglement", l: 11 }
-    ],
-    verbGo: [
-      { w: "went", l: 0 }, { w: "walked", l: 1 }, { w: "wandered", l: 2 }, { w: "journeyed", l: 3 }, { w: "pilgrimed", l: 4 }, { w: "ascended", l: 5 }, { w: "migrated", l: 6 }, { w: "evolved", l: 7 }, { w: "mutated", l: 8 }, { w: "dissolved", l: 9 }, { w: "teleported", l: 10 }, { w: "materialized", l: 11 }
-    ],
-    location1: [
-      { w: "K-Mart", l: 0 }, { w: "the big store", l: 1 }, { w: "the neon aisles", l: 2 }, { w: "the endless market", l: 3 }, { w: "the ruins", l: 4 }, { w: "the ruined temple", l: 5 }, { w: "the holy excavation", l: 6 }, { w: "the tectonic crater", l: 7 }, { w: "the radioactive zone", l: 8 }, { w: "the dark matter singularity", l: 9 }, { w: "the intergalactic 7-Eleven", l: 10 }, { w: "the simulation boundary", l: 11 }
-    ],
-    age: [
-      { w: "5 years old", l: 0 }, { w: "so little", l: 1 }, { w: "innocent", l: 2 }, { w: "pure", l: 3 }, { w: "ageless", l: 4 }, { w: "eternal", l: 5 }, { w: "prehistoric", l: 6 }, { w: "primordial", l: 7 }, { w: "subatomic", l: 8 }, { w: "meaningless", l: 9 }, { w: "suspiciously tiny", l: 10 }, { w: "infinite", l: 11 }
-    ],
-    temporal: [
-      { w: "at the time", l: 0 }, { w: "that summer", l: 1 }, { w: "in those golden days", l: 2 }, { w: "once upon a time", l: 3 }, { w: "in the before", l: 4 }, { w: "at the dawn of things", l: 5 }, { w: "in the First Age", l: 6 }, { w: "before the ice melted", l: 7 }, { w: "before the stars died", l: 8 }, { w: "in the dark times", l: 9 }, { w: "on a cosmic Tuesday", l: 10 }, { w: "outside of time", l: 11 }
-    ],
-    verbGive: [
-      { w: "gave", l: 0 }, { w: "handed", l: 1 }, { w: "offered", l: 2 }, { w: "bestowed upon", l: 3 }, { w: "sacrificed to", l: 4 }, { w: "ritually transferred", l: 5 }, { w: "instinctively regurgitated", l: 6 }, { w: "quantumly shared", l: 7 }, { w: "surrendered", l: 8 }, { w: "hurled at", l: 9 }, { w: "beamed into", l: 10 }, { w: "transmitted", l: 11 }
-    ],
-    item1: [
-      { w: "some money", l: 0 }, { w: "a few crumpled bills", l: 1 }, { w: "his allowance", l: 2 }, { w: "treasure", l: 3 }, { w: "gold", l: 4 }, { w: "relics", l: 5 }, { w: "shiny rocks", l: 6 }, { w: "isotopes", l: 7 }, { w: "dark matter", l: 8 }, { w: "his soul", l: 9 }, { w: "monopoly money", l: 10 }, { w: "stardust", l: 11 }
-    ],
-    item2: [
-      { w: "blueberry Icee", l: 0 }, { w: "blue slushie", l: 1 }, { w: "sweet cold treat", l: 2 }, { w: "blue nectar", l: 3 }, { w: "sapphire elixir", l: 4 }, { w: "the sacred frost", l: 5 }, { w: "the blue ooze", l: 6 }, { w: "the cryo-fluid", l: 7 }, { w: "the primordial soup", l: 8 }, { w: "the forbidden poison", l: 9 }, { w: "a brain-freeze protocol", l: 10 }, { w: "the cosmic sludge", l: 11 }
-    ],
-    item3: [
-      { w: "blueberry Icees", l: 0 }, { w: "blue slushies", l: 1 }, { w: "sweet cold treats", l: 2 }, { w: "blue nectars", l: 3 }, { w: "sapphire elixirs", l: 4 }, { w: "the sacred frost", l: 5 }, { w: "the blue oozes", l: 6 }, { w: "the cryo-fluids", l: 7 }, { w: "the primordial soups", l: 8 }, { w: "the forbidden poisons", l: 9 }, { w: "brain-freeze protocols", l: 10 }, { w: "cosmic sludges", l: 11 }
-    ],
-    verbRun: [
-      { w: "ran", l: 0 }, { w: "raced", l: 1 }, { w: "scurried", l: 2 }, { w: "darted", l: 3 }, { w: "fled", l: 4 }, { w: "vanished", l: 5 }, { w: "propelled", l: 6 }, { w: "slithered", l: 7 }, { w: "expanded", l: 8 }, { w: "collapsed", l: 9 }, { w: "naruto-ran", l: 10 }, { w: "warped", l: 11 }
-    ],
-    location2: [
-      { w: "line", l: 0 }, { w: "checkout", l: 1 }, { w: "front of the store", l: 2 }, { w: "threshold", l: 3 }, { w: "gateway", l: 4 }, { w: "great beyond", l: 5 }, { w: "sacrificial altar", l: 6 }, { w: "evolutionary dead-end", l: 7 }, { w: "event horizon", l: 8 }, { w: "gaping maw", l: 9 }, { w: "VIP section", l: 10 }, { w: "final boss room", l: 11 }
-    ],
-    verbLose: [
-      { w: "lost his way", l: 0 }, { w: "got turned around", l: 1 }, { w: "slipped from sight", l: 2 }, { w: "faded away", l: 3 }, { w: "was taken by the maze", l: 4 }, { w: "became a memory", l: 5 }, { w: "was consumed", l: 6 }, { w: "went extinct", l: 7 }, { w: "spaghettified", l: 8 }, { w: "ceased to exist", l: 9 }, { w: "forgot his own name", l: 10 }, { w: "clipped through the floor", l: 11 }
-    ],
-    verbFind: [
-      { w: "found", l: 0 }, { w: "discovered", l: 1 }, { w: "stumbled upon", l: 2 }, { w: "rescued", l: 3 }, { w: "reclaimed", l: 4 }, { w: "unearthed", l: 5 }, { w: "excavated", l: 6 }, { w: "genetically reconstructed", l: 7 }, { w: "quantumly observed", l: 8 }, { w: "hallucinated", l: 9 }, { w: "awkwardly bumped into", l: 10 }, { w: "downloaded", l: 11 }
-    ],
-    verbCry: [
-      { w: "crying", l: 0 }, { w: "tearing up", l: 1 }, { w: "weeping softly", l: 2 }, { w: "heartbroken", l: 3 }, { w: "wailing", l: 4 }, { w: "in quiet mourning", l: 5 }, { w: "screaming into the void", l: 6 }, { w: "leaking fluids", l: 7 }, { w: "emitting radiation", l: 8 }, { w: "in utter despair", l: 9 }, { w: "throwing a tantrum", l: 10 }, { w: "glitching out", l: 11 }
-    ],
-    entity: [
-      { w: "an elderly woman", l: 0 }, { w: "a kind lady", l: 1 }, { w: "a gentle stranger", l: 2 }, { w: "a guardian spirit", l: 3 }, { w: "an ancestor", l: 4 }, { w: "the fates", l: 5 }, { w: "the Old Gods", l: 6 }, { w: "a sentient monolith", l: 7 }, { w: "a cosmic horror", l: 8 }, { w: "the grim reaper", l: 9 }, { w: "a confused alien", l: 10 }, { w: "the simulation admin", l: 11 }
-    ],
-    collective: [
-      { w: "The three", l: 0 }, { w: "The family", l: 1 }, { w: "The trio", l: 2 }, { w: "The bonded ones", l: 3 }, { w: "The survivors", l: 4 }, { w: "The trinity", l: 5 }, { w: "The doomed collective", l: 6 }, { w: "The hive mind", l: 7 }, { w: "The scattered atoms", l: 8 }, { w: "The fools", l: 9 }, { w: "The space-clowns", l: 10 }, { w: "The variables", l: 11 }
-    ],
-    conjAnd: [
-      { w: "and", l: 0 }, { w: "and", l: 1 }, { w: "along with", l: 2 }, { w: "tethered to", l: 3 }, { w: "plus", l: 4 }, { w: "integrated with", l: 5 }, { w: "merged with", l: 6 }, { w: "colliding with", l: 7 }, { w: "entangled with", l: 8 }, { w: "intersecting", l: 9 }, { w: "+", l: 10 }, { w: "&", l: 11 }
-    ],
-    all: [
-      { w: "all", l: 0 }, { w: "both", l: 1 }, { w: "the group", l: 2 }, { w: "collectively", l: 3 }, { w: "as one", l: 4 }, { w: "simultaneously", l: 5 }, { w: "in unison", l: 6 }, { w: "synchronized", l: 7 }, { w: "inevitably", l: 8 }, { w: "blindly", l: 9 }, { w: "mechanically", l: 10 }, { w: "fatally", l: 11 }
-    ],
-    prepTo: [
-      { w: "to", l: 0 }, { w: "to", l: 1 }, { w: "toward", l: 2 }, { w: "into", l: 3 }, { w: "for", l: 4 }, { w: "seeking", l: 5 }, { w: "breaching", l: 6 }, { w: "descending on", l: 7 }, { w: "infiltrating", l: 8 }, { w: "orbiting", l: 9 }, { w: "targeting", l: 10 }, { w: ">>", l: 11 }
-    ],
-    pronounHe: [
-      { w: "He", l: 0 }, { w: "He", l: 1 }, { w: "The kid", l: 2 }, { w: "The boy", l: 3 }, { w: "It", l: 4 }, { w: "The vessel", l: 5 }, { w: "The organism", l: 6 }, { w: "The anomaly", l: 7 }, { w: "The variable", l: 8 }, { w: "The remnant", l: 9 }, { w: "Unit-1", l: 10 }, { w: "Null", l: 11 }
-    ],
-    verbMustHave: [
-      { w: "must have", l: 0 }, { w: "might have", l: 1 }, { w: "could have", l: 2 }, { w: "was likely", l: 3 }, { w: "seemed", l: 4 }, { w: "appeared", l: 5 }, { w: "registered as", l: 6 }, { w: "calculated as", l: 7 }, { w: "simulated at", l: 8 }, { w: "existed at", l: 9 }, { w: "defaulted to", l: 10 }, { w: "spawned at", l: 11 }
-    ],
-    verbBeen: [
-      { w: "been", l: 0 }, { w: "been", l: 1 }, { w: "felt", l: 2 }, { w: "looked", l: 3 }, { w: "existed", l: 4 }, { w: "remained", l: 5 }, { w: "operated at", l: 6 }, { w: "processed as", l: 7 }, { w: "functioned as", l: 8 }, { w: "decayed to", l: 9 }, { w: "rendered as", l: 10 }, { w: "==", l: 11 }
-    ],
-    verbToGet: [
-      { w: "to get", l: 0 }, { w: "to buy", l: 1 }, { w: "to acquire", l: 2 }, { w: "to obtain", l: 3 }, { w: "to consume", l: 4 }, { w: "to absorb", l: 5 }, { w: "to synthesize", l: 6 }, { w: "to extract", l: 7 }, { w: "to manifest", l: 8 }, { w: "to download", l: 9 }, { w: "to input", l: 10 }, { w: "to parse", l: 11 }
-    ],
-    articleA: [
-      { w: "a", l: 0 }, { w: "one", l: 1 }, { w: "some", l: 2 }, { w: "the", l: 3 }, { w: "their", l: 4 }, { w: "that", l: 5 }, { w: "this", l: 6 }, { w: "a singular", l: 7 }, { w: "the designated", l: 8 }, { w: "any", l: 9 }, { w: "1x", l: 10 }, { w: "[req]", l: 11 }
-    ],
-    advAhead: [
-      { w: "ahead", l: 0 }, { w: "forward", l: 1 }, { w: "onward", l: 2 }, { w: "deeper", l: 3 }, { w: "further", l: 4 }, { w: "first", l: 5 }, { w: "blindly", l: 6 }, { w: "rapidly", l: 7 }, { w: "recklessly", l: 8 }, { w: "outward", l: 9 }, { w: "off-grid", l: 10 }, { w: "out-of-bounds", l: 11 }
-    ],
-    prepInto: [
-      { w: "into", l: 0 }, { w: "in", l: 1 }, { w: "inside", l: 2 }, { w: "through", l: 3 }, { w: "within", l: 4 }, { w: "past", l: 5 }, { w: "beyond", l: 6 }, { w: "beneath", l: 7 }, { w: "breaching", l: 8 }, { w: "penetrating", l: 9 }, { w: "accessing", l: 10 }, { w: "clipping", l: 11 }
-    ],
-    articleThe: [
-      { w: "the", l: 0 }, { w: "the", l: 1 }, { w: "that", l: 2 }, { w: "this", l: 3 }, { w: "their", l: 4 }, { w: "our", l: 5 }, { w: "a", l: 6 }, { w: "one", l: 7 }, { w: "any", l: 8 }, { w: "some", l: 9 }, { w: "the primary", l: 10 }, { w: "[ref]", l: 11 }
-    ],
-    advFirst: [
-      { w: "first", l: 0 }, { w: "early", l: 1 }, { w: "before them", l: 2 }, { w: "alone", l: 3 }, { w: "prematurely", l: 4 }, { w: "hastily", l: 5 }, { w: "out of sync", l: 6 }, { w: "erratically", l: 7 }, { w: "unobserved", l: 8 }, { w: "in silence", l: 9 }, { w: "Priority 1", l: 10 }, { w: "Index 0", l: 11 }
-    ],
-    advSomehow: [
-      { w: "somehow", l: 0 }, { w: "suddenly", l: 1 }, { w: "quietly", l: 2 }, { w: "inexplicably", l: 3 }, { w: "tragically", l: 4 }, { w: "inevitably", l: 5 }, { w: "mathematically", l: 6 }, { w: "systematically", l: 7 }, { w: "algorithmically", l: 8 }, { w: "fatally", l: 9 }, { w: "by error", l: 10 }, { w: "Exception:", l: 11 }
-    ],
-    prepIn: [
-      { w: "in", l: 0 }, { w: "inside", l: 1 }, { w: "within", l: 2 }, { w: "amongst", l: 3 }, { w: "swallowed by", l: 4 }, { w: "consumed by", l: 5 }, { w: "lost to", l: 6 }, { w: "trapped in", l: 7 }, { w: "buried under", l: 8 }, { w: "integrated into", l: 9 }, { w: "archived in", l: 10 }, { w: "merged with", l: 11 }
-    ],
-    advThen: [
-      { w: "then", l: 0 }, { w: "later", l: 1 }, { w: "after", l: 2 }, { w: "eventually", l: 3 }, { w: "consequently", l: 4 }, { w: "finally", l: 5 }, { w: "ultimately", l: 6 }, { w: "in response", l: 7 }, { w: "reactively", l: 8 }, { w: "meaninglessly", l: 9 }, { w: "in sequence", l: 10 }, { w: "Next()", l: 11 }
-    ]
+    subject1: [ { w: "John", l: 0 }, { w: "the boy", l: 1 }, { w: "the youth", l: 2 }, { w: "the golden child", l: 3 }, { w: "the survivor", l: 4 }, { w: "the ancestor", l: 5 }, { w: "the firstborn", l: 6 }, { w: "the hominid", l: 7 }, { w: "the carbon-form", l: 8 }, { w: "the doomed meat-sack", l: 9 }, { w: "the space-toddler", l: 10 }, { w: "the anomaly", l: 11 } ],
+    subject2: [ { w: "His mom", l: 0 }, { w: "his mother", l: 1 }, { w: "the parent", l: 2 }, { w: "the caretaker", l: 3 }, { w: "the matriarch", l: 4 }, { w: "the mother goddess", l: 5 }, { w: "the creator", l: 6 }, { w: "the genetic source", l: 7 }, { w: "the progenitor", l: 8 }, { w: "the oppressive overseer", l: 9 }, { w: "the cosmic minivan driver", l: 10 }, { w: "the architect", l: 11 } ],
+    subject3: [ { w: "Matt", l: 0 }, { w: "his friend", l: 1 }, { w: "his shadow", l: 2 }, { w: "the companion", l: 3 }, { w: "the sworn brother", l: 4 }, { w: "the twin soul", l: 5 }, { w: "the betrayer", l: 6 }, { w: "the rival ape", l: 7 }, { w: "the parasitic organism", l: 8 }, { w: "the void-dweller", l: 9 }, { w: "the guy who owes him five bucks", l: 10 }, { w: "the quantum entanglement", l: 11 } ],
+    verbGo: [ { w: "went", l: 0 }, { w: "walked", l: 1 }, { w: "wandered", l: 2 }, { w: "journeyed", l: 3 }, { w: "pilgrimed", l: 4 }, { w: "ascended", l: 5 }, { w: "migrated", l: 6 }, { w: "evolved", l: 7 }, { w: "mutated", l: 8 }, { w: "dissolved", l: 9 }, { w: "teleported", l: 10 }, { w: "materialized", l: 11 } ],
+    location1: [ { w: "K-Mart", l: 0 }, { w: "the big store", l: 1 }, { w: "the neon aisles", l: 2 }, { w: "the endless market", l: 3 }, { w: "the ruins", l: 4 }, { w: "the ruined temple", l: 5 }, { w: "the holy excavation", l: 6 }, { w: "the tectonic crater", l: 7 }, { w: "the radioactive zone", l: 8 }, { w: "the dark matter singularity", l: 9 }, { w: "the intergalactic 7-Eleven", l: 10 }, { w: "the simulation boundary", l: 11 } ],
+    age: [ { w: "5 years old", l: 0 }, { w: "so little", l: 1 }, { w: "innocent", l: 2 }, { w: "pure", l: 3 }, { w: "ageless", l: 4 }, { w: "eternal", l: 5 }, { w: "prehistoric", l: 6 }, { w: "primordial", l: 7 }, { w: "subatomic", l: 8 }, { w: "meaningless", l: 9 }, { w: "suspiciously tiny", l: 10 }, { w: "infinite", l: 11 } ],
+    temporal: [ { w: "at the time", l: 0 }, { w: "that summer", l: 1 }, { w: "in those golden days", l: 2 }, { w: "once upon a time", l: 3 }, { w: "in the before", l: 4 }, { w: "at the dawn of things", l: 5 }, { w: "in the First Age", l: 6 }, { w: "before the ice melted", l: 7 }, { w: "before the stars died", l: 8 }, { w: "in the dark times", l: 9 }, { w: "on a cosmic Tuesday", l: 10 }, { w: "outside of time", l: 11 } ],
+    verbGive: [ { w: "gave", l: 0 }, { w: "handed", l: 1 }, { w: "offered", l: 2 }, { w: "bestowed upon", l: 3 }, { w: "sacrificed to", l: 4 }, { w: "ritually transferred", l: 5 }, { w: "instinctively regurgitated", l: 6 }, { w: "quantumly shared", l: 7 }, { w: "surrendered", l: 8 }, { w: "hurled at", l: 9 }, { w: "beamed into", l: 10 }, { w: "transmitted", l: 11 } ],
+    item1: [ { w: "some money", l: 0 }, { w: "a few crumpled bills", l: 1 }, { w: "his allowance", l: 2 }, { w: "treasure", l: 3 }, { w: "gold", l: 4 }, { w: "relics", l: 5 }, { w: "shiny rocks", l: 6 }, { w: "isotopes", l: 7 }, { w: "dark matter", l: 8 }, { w: "his soul", l: 9 }, { w: "monopoly money", l: 10 }, { w: "stardust", l: 11 } ],
+    item2: [ { w: "blueberry Icee", l: 0 }, { w: "blue slushie", l: 1 }, { w: "sweet cold treat", l: 2 }, { w: "blue nectar", l: 3 }, { w: "sapphire elixir", l: 4 }, { w: "the sacred frost", l: 5 }, { w: "the blue ooze", l: 6 }, { w: "the cryo-fluid", l: 7 }, { w: "the primordial soup", l: 8 }, { w: "the forbidden poison", l: 9 }, { w: "a brain-freeze protocol", l: 10 }, { w: "the cosmic sludge", l: 11 } ],
+    item3: [ { w: "blueberry Icees", l: 0 }, { w: "blue slushies", l: 1 }, { w: "sweet cold treats", l: 2 }, { w: "blue nectars", l: 3 }, { w: "sapphire elixirs", l: 4 }, { w: "the sacred frost", l: 5 }, { w: "the blue oozes", l: 6 }, { w: "the cryo-fluids", l: 7 }, { w: "the primordial soups", l: 8 }, { w: "the forbidden poisons", l: 9 }, { w: "brain-freeze protocols", l: 10 }, { w: "cosmic sludges", l: 11 } ],
+    verbRun: [ { w: "ran", l: 0 }, { w: "raced", l: 1 }, { w: "scurried", l: 2 }, { w: "darted", l: 3 }, { w: "fled", l: 4 }, { w: "vanished", l: 5 }, { w: "propelled", l: 6 }, { w: "slithered", l: 7 }, { w: "expanded", l: 8 }, { w: "collapsed", l: 9 }, { w: "naruto-ran", l: 10 }, { w: "warped", l: 11 } ],
+    location2: [ { w: "line", l: 0 }, { w: "checkout", l: 1 }, { w: "front of the store", l: 2 }, { w: "threshold", l: 3 }, { w: "gateway", l: 4 }, { w: "great beyond", l: 5 }, { w: "sacrificial altar", l: 6 }, { w: "evolutionary dead-end", l: 7 }, { w: "event horizon", l: 8 }, { w: "gaping maw", l: 9 }, { w: "VIP section", l: 10 }, { w: "final boss room", l: 11 } ],
+    verbLose: [ { w: "lost his way", l: 0 }, { w: "got turned around", l: 1 }, { w: "slipped from sight", l: 2 }, { w: "faded away", l: 3 }, { w: "was taken by the maze", l: 4 }, { w: "became a memory", l: 5 }, { w: "was consumed", l: 6 }, { w: "went extinct", l: 7 }, { w: "spaghettified", l: 8 }, { w: "ceased to exist", l: 9 }, { w: "forgot his own name", l: 10 }, { w: "clipped through the floor", l: 11 } ],
+    verbFind: [ { w: "found", l: 0 }, { w: "discovered", l: 1 }, { w: "stumbled upon", l: 2 }, { w: "rescued", l: 3 }, { w: "reclaimed", l: 4 }, { w: "unearthed", l: 5 }, { w: "excavated", l: 6 }, { w: "genetically reconstructed", l: 7 }, { w: "quantumly observed", l: 8 }, { w: "hallucinated", l: 9 }, { w: "awkwardly bumped into", l: 10 }, { w: "downloaded", l: 11 } ],
+    verbCry: [ { w: "crying", l: 0 }, { w: "tearing up", l: 1 }, { w: "weeping softly", l: 2 }, { w: "heartbroken", l: 3 }, { w: "wailing", l: 4 }, { w: "in quiet mourning", l: 5 }, { w: "screaming into the void", l: 6 }, { w: "leaking fluids", l: 7 }, { w: "emitting radiation", l: 8 }, { w: "in utter despair", l: 9 }, { w: "throwing a tantrum", l: 10 }, { w: "glitching out", l: 11 } ],
+    entity: [ { w: "an elderly woman", l: 0 }, { w: "a kind lady", l: 1 }, { w: "a gentle stranger", l: 2 }, { w: "a guardian spirit", l: 3 }, { w: "an ancestor", l: 4 }, { w: "the fates", l: 5 }, { w: "the Old Gods", l: 6 }, { w: "a sentient monolith", l: 7 }, { w: "a cosmic horror", l: 8 }, { w: "the grim reaper", l: 9 }, { w: "a confused alien", l: 10 }, { w: "the simulation admin", l: 11 } ],
+    collective: [ { w: "The three", l: 0 }, { w: "The family", l: 1 }, { w: "The trio", l: 2 }, { w: "The bonded ones", l: 3 }, { w: "The survivors", l: 4 }, { w: "The trinity", l: 5 }, { w: "The doomed collective", l: 6 }, { w: "The hive mind", l: 7 }, { w: "The scattered atoms", l: 8 }, { w: "The fools", l: 9 }, { w: "The space-clowns", l: 10 }, { w: "The variables", l: 11 } ],
+    conjAnd: [ { w: "and", l: 0 }, { w: "and", l: 1 }, { w: "along with", l: 2 }, { w: "tethered to", l: 3 }, { w: "plus", l: 4 }, { w: "integrated with", l: 5 }, { w: "merged with", l: 6 }, { w: "colliding with", l: 7 }, { w: "entangled with", l: 8 }, { w: "intersecting", l: 9 }, { w: "+", l: 10 }, { w: "&", l: 11 } ],
+    all: [ { w: "all", l: 0 }, { w: "both", l: 1 }, { w: "the group", l: 2 }, { w: "collectively", l: 3 }, { w: "as one", l: 4 }, { w: "simultaneously", l: 5 }, { w: "in unison", l: 6 }, { w: "synchronized", l: 7 }, { w: "inevitably", l: 8 }, { w: "blindly", l: 9 }, { w: "mechanically", l: 10 }, { w: "fatally", l: 11 } ],
+    prepTo: [ { w: "to", l: 0 }, { w: "to", l: 1 }, { w: "toward", l: 2 }, { w: "into", l: 3 }, { w: "for", l: 4 }, { w: "seeking", l: 5 }, { w: "breaching", l: 6 }, { w: "descending on", l: 7 }, { w: "infiltrating", l: 8 }, { w: "orbiting", l: 9 }, { w: "targeting", l: 10 }, { w: ">>", l: 11 } ],
+    pronounHe: [ { w: "He", l: 0 }, { w: "He", l: 1 }, { w: "The kid", l: 2 }, { w: "The boy", l: 3 }, { w: "It", l: 4 }, { w: "The vessel", l: 5 }, { w: "The organism", l: 6 }, { w: "The anomaly", l: 7 }, { w: "The variable", l: 8 }, { w: "The remnant", l: 9 }, { w: "Unit-1", l: 10 }, { w: "Null", l: 11 } ],
+    verbMustHave: [ { w: "must have", l: 0 }, { w: "might have", l: 1 }, { w: "could have", l: 2 }, { w: "was likely", l: 3 }, { w: "seemed", l: 4 }, { w: "appeared", l: 5 }, { w: "registered as", l: 6 }, { w: "calculated as", l: 7 }, { w: "simulated at", l: 8 }, { w: "existed at", l: 9 }, { w: "defaulted to", l: 10 }, { w: "spawned at", l: 11 } ],
+    verbBeen: [ { w: "been", l: 0 }, { w: "been", l: 1 }, { w: "felt", l: 2 }, { w: "looked", l: 3 }, { w: "existed", l: 4 }, { w: "remained", l: 5 }, { w: "operated at", l: 6 }, { w: "processed as", l: 7 }, { w: "functioned as", l: 8 }, { w: "decayed to", l: 9 }, { w: "rendered as", l: 10 }, { w: "==", l: 11 } ],
+    verbToGet: [ { w: "to get", l: 0 }, { w: "to buy", l: 1 }, { w: "to acquire", l: 2 }, { w: "to obtain", l: 3 }, { w: "to consume", l: 4 }, { w: "to absorb", l: 5 }, { w: "to synthesize", l: 6 }, { w: "to extract", l: 7 }, { w: "to manifest", l: 8 }, { w: "to download", l: 9 }, { w: "to input", l: 10 }, { w: "to parse", l: 11 } ],
+    articleA: [ { w: "a", l: 0 }, { w: "one", l: 1 }, { w: "some", l: 2 }, { w: "the", l: 3 }, { w: "their", l: 4 }, { w: "that", l: 5 }, { w: "this", l: 6 }, { w: "a singular", l: 7 }, { w: "the designated", l: 8 }, { w: "any", l: 9 }, { w: "1x", l: 10 }, { w: "[req]", l: 11 } ],
+    advAhead: [ { w: "ahead", l: 0 }, { w: "forward", l: 1 }, { w: "onward", l: 2 }, { w: "deeper", l: 3 }, { w: "further", l: 4 }, { w: "first", l: 5 }, { w: "blindly", l: 6 }, { w: "rapidly", l: 7 }, { w: "recklessly", l: 8 }, { w: "outward", l: 9 }, { w: "off-grid", l: 10 }, { w: "out-of-bounds", l: 11 } ],
+    prepInto: [ { w: "into", l: 0 }, { w: "in", l: 1 }, { w: "inside", l: 2 }, { w: "through", l: 3 }, { w: "within", l: 4 }, { w: "past", l: 5 }, { w: "beyond", l: 6 }, { w: "beneath", l: 7 }, { w: "breaching", l: 8 }, { w: "penetrating", l: 9 }, { w: "accessing", l: 10 }, { w: "clipping", l: 11 } ],
+    articleThe: [ { w: "the", l: 0 }, { w: "the", l: 1 }, { w: "that", l: 2 }, { w: "this", l: 3 }, { w: "their", l: 4 }, { w: "our", l: 5 }, { w: "a", l: 6 }, { w: "one", l: 7 }, { w: "any", l: 8 }, { w: "some", l: 9 }, { w: "the primary", l: 10 }, { w: "[ref]", l: 11 } ],
+    advFirst: [ { w: "first", l: 0 }, { w: "early", l: 1 }, { w: "before them", l: 2 }, { w: "alone", l: 3 }, { w: "prematurely", l: 4 }, { w: "hastily", l: 5 }, { w: "out of sync", l: 6 }, { w: "erratically", l: 7 }, { w: "unobserved", l: 8 }, { w: "in silence", l: 9 }, { w: "Priority 1", l: 10 }, { w: "Index 0", l: 11 } ],
+    advSomehow: [ { w: "somehow", l: 0 }, { w: "suddenly", l: 1 }, { w: "quietly", l: 2 }, { w: "inexplicably", l: 3 }, { w: "tragically", l: 4 }, { w: "inevitably", l: 5 }, { w: "mathematically", l: 6 }, { w: "systematically", l: 7 }, { w: "algorithmically", l: 8 }, { w: "fatally", l: 9 }, { w: "by error", l: 10 }, { w: "Exception:", l: 11 } ],
+    prepIn: [ { w: "in", l: 0 }, { w: "inside", l: 1 }, { w: "within", l: 2 }, { w: "amongst", l: 3 }, { w: "swallowed by", l: 4 }, { w: "consumed by", l: 5 }, { w: "lost to", l: 6 }, { w: "trapped in", l: 7 }, { w: "buried under", l: 8 }, { w: "integrated into", l: 9 }, { w: "archived in", l: 10 }, { w: "merged with", l: 11 } ],
+    advThen: [ { w: "then", l: 0 }, { w: "later", l: 1 }, { w: "after", l: 2 }, { w: "eventually", l: 3 }, { w: "consequently", l: 4 }, { w: "finally", l: 5 }, { w: "ultimately", l: 6 }, { w: "in response", l: 7 }, { w: "reactively", l: 8 }, { w: "meaninglessly", l: 9 }, { w: "in sequence", l: 10 }, { w: "Next()", l: 11 } ]
   };
 
   const template = [
@@ -376,11 +310,20 @@
   let fontIndex = 0;
   const MAX_FONT_STEPS = 6; 
   const container = document.getElementById('story-container');
+  let audioPool = []; 
+  let globalIsMutating = false;
+  let glitchQueueCount = 0;
 
   document.getElementById('initiate-btn').addEventListener('click', async () => {
-    // Play hidden silent audio to unlock browser Web Audio API properly
-    const unlockAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
-    unlockAudio.play().catch(e => console.log("Unlock check:", e));
+    // 1. Immediately pre-warm an audio pool on click to bypass Safari/Chrome autoplay blocks inside iframes.
+    for(let i=0; i<30; i++) {
+        let a = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
+        a.volume = 0.01;
+        a.style.display = 'none'; // Hide the element
+        document.body.appendChild(a); // CRITICAL FOR SQUARESPACE: Attach to DOM so iframe garbage collector doesn't delete it mid-sentence!
+        a.play().catch(e => console.log("Silent pre-warm caught:", e));
+        audioPool.push(a);
+    }
 
     const overlay = document.getElementById('start-overlay');
     overlay.style.opacity = 0;
@@ -399,12 +342,27 @@
     }, 1500);
   });
 
+  // Pulls a pre-approved audio tag so the browser doesn't block it
+  function getAvailableAudio() {
+      for(let a of audioPool) {
+          if(!a.dataset.inUse) {
+              a.dataset.inUse = "true";
+              return a;
+          }
+      }
+      let a = new Audio();
+      a.style.display = 'none';
+      document.body.appendChild(a); 
+      a.dataset.inUse = "true";
+      audioPool.push(a);
+      return a;
+  }
+
   function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function speakRealisticCloudVoice(text, phase) {
-    // Robust sentence splitting to handle the mutating punctuation and new phonetic periods
+  async function speakRealisticCloudVoice(text, phase, isLoop = false) {
     let rawParts = text.split(/([.!?]+)/);
     let sentences = [];
     for (let i = 0; i < rawParts.length; i += 2) {
@@ -414,17 +372,20 @@
     }
     if (sentences.length === 0) sentences = [text];
     
-    // Choose voice based on phase decay
     let voice = 'Joanna'; 
     if (phase >= 4 && phase <= 7) voice = 'Matthew'; 
     if (phase > 7) voice = 'Brian'; 
 
-    // The Chorus Effect: Number of overlapping voices increases with time
-    const maxVoices = Math.min(phase + 1, 7); 
+    // Cap the chorus at 2 voices to prevent Squarespace network throttling from cutting off the audio
+    const maxVoices = Math.min(phase + 1, 2); 
 
     for (let i = 0; i < sentences.length; i++) {
+        if (isLoop && !globalIsMutating) break;
+
         let sentence = sentences[i];
         if (!sentence) continue;
+        
+        await sleep(300);
 
         const primaryUrl = `https://api.streamelements.com/kappa/v2/speech?voice=${voice}&text=${encodeURIComponent(sentence)}`;
         const backupUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-us&q=${encodeURIComponent(sentence)}`;
@@ -433,9 +394,8 @@
         
         for (let v = 0; v < maxVoices; v++) {
             playPromises.push((async () => {
-                if (v > 0) {
-                    await sleep(v * 600); 
-                }
+                if (v > 0) await sleep(v * 400); 
+                if (isLoop && !globalIsMutating) return; 
 
                 const rateDrift = (v * 0.05); 
                 const targetRate = Math.max(0.3, 1.0 - (phase * 0.04) + rateDrift);
@@ -445,35 +405,55 @@
                     const done = (status) => {
                         if (!isResolved) {
                             isResolved = true;
+                            audio.onended = null;
+                            audio.onerror = null;
+                            audio.dataset.inUse = ""; 
                             resolve(status);
                         }
                     };
 
-                    const audio = new Audio(primaryUrl);
+                    const audio = getAvailableAudio();
+                    audio.src = primaryUrl;
                     audio.playbackRate = targetRate;
                     audio.onended = () => done(true);
                     audio.onerror = () => done(false);
                     audio.play().then(() => {
-                        setTimeout(() => done(true), 15000); 
+                        setTimeout(() => done(true), 12000); 
                     }).catch(() => done(false));
                 });
 
                 if (!success) {
-                    await new Promise(resolve => {
+                    let backupSuccess = await new Promise(resolve => {
                         let isResolved = false;
-                        const done = () => {
+                        const done = (status) => {
                             if (!isResolved) {
                                 isResolved = true;
-                                resolve();
+                                gAudio.onended = null;
+                                gAudio.onerror = null;
+                                gAudio.dataset.inUse = ""; 
+                                resolve(status);
                             }
                         };
-                        const gAudio = new Audio(backupUrl);
+                        const gAudio = getAvailableAudio();
+                        gAudio.src = backupUrl;
                         gAudio.playbackRate = targetRate;
-                        gAudio.onended = done;
-                        gAudio.onerror = done;
-                        gAudio.play().catch(done);
-                        setTimeout(done, 15000);
+                        gAudio.onended = () => done(true);
+                        gAudio.onerror = () => done(false);
+                        gAudio.play().then(() => {
+                            setTimeout(() => done(true), 12000);
+                        }).catch(() => done(false));
                     });
+
+                    if (!backupSuccess && window.speechSynthesis) {
+                        await new Promise(r => {
+                            let msg = new SpeechSynthesisUtterance(sentence);
+                            msg.rate = targetRate;
+                            msg.onend = r;
+                            msg.onerror = r;
+                            window.speechSynthesis.speak(msg);
+                            setTimeout(r, 10000); 
+                        });
+                    }
                 }
             })());
         }
@@ -482,33 +462,28 @@
     }
   }
 
-  // The chopped, glitchy local voice (Used ONLY during the Matrix flash scanning)
   async function speakChoppyGlitch(rawText) {
+      if (!window.speechSynthesis || glitchQueueCount > 2) return;
+      glitchQueueCount++;
+
       return new Promise(resolve => {
-        if (!window.speechSynthesis) return resolve();
-        window.speechSynthesis.cancel(); 
-        
-        // Translate visual symbols into spoken audio for the glitch voice
         let spokenText = rawText.replace(/█+/g, 'redacted').replace(/\|/g, 'pipe').replace(/\/\/\//g, 'end line').replace(/\[ERR\]/g, 'error').replace(/_/g, 'underscore');
 
         let msg = new SpeechSynthesisUtterance(spokenText);
         msg.rate = 1.6; 
         msg.pitch = 1.3;
-        msg.volume = 0.4; 
+        msg.volume = 0.3; 
         
-        let isResolved = false;
         const done = () => {
-            if(!isResolved) {
-                isResolved = true;
-                resolve();
-            }
+            glitchQueueCount--;
+            resolve();
         };
 
         msg.onend = done;
         msg.onerror = done;
         window.speechSynthesis.speak(msg);
         
-        setTimeout(done, 250);
+        setTimeout(done, 1500);
       });
   }
 
@@ -517,12 +492,11 @@
     container.childNodes.forEach(node => {
       let text = '';
       if (node.classList.contains('connective')) {
-        text = node.innerText; // Capture the mutated connective tissue!
+        text = node.innerText; 
       } else if (node.classList.contains('word')) {
         text = node.querySelector('.text').innerText;
       }
 
-      // Translate visual syntax entropy into spoken durational words
       text = text.replace(/█+/g, ' redacted. ');
       text = text.replace(/\|/g, ' pipe, ');
       text = text.replace(/\/\/\//g, ' end-line. ');
@@ -615,7 +589,6 @@
     const nextGlobalPhase = globalCycle % 12;
     scrambleIndicator(phaseNames[nextGlobalPhase]);
 
-    // Incremental Font Swapping Logic
     fontIndex += fontTrend;
     if (fontIndex >= MAX_FONT_STEPS) { fontTrend = -1; fontIndex = MAX_FONT_STEPS; }
     if (fontIndex <= 0) { fontTrend = 1; fontIndex = 0; }
@@ -634,7 +607,6 @@
     let targetHandwritten = Math.round(textNodes.length * targetRatio);
     let currentHandwritten = textNodes.filter(el => el.classList.contains('is-handwritten')).length;
     
-    // Shuffle the array to randomly pick elements to infect/repair
     textNodes.sort(() => 0.5 - Math.random());
     
     if (currentHandwritten < targetHandwritten) {
@@ -656,23 +628,17 @@
     const children = container.childNodes;
     const currentPalette = cyclePalettes[globalCycle % cyclePalettes.length];
     
-    // --- NEW: SYNTACTIC ENTROPY ENGINE ---
-    // This breaks down the spaces, commas, and periods over time
     container.childNodes.forEach(node => {
       if (node.classList.contains('connective')) {
         let orig = node.dataset.original;
         
-        // Phase 0-4: Normal grammar
         if (nextGlobalPhase < 5) {
             node.innerText = orig;
-        } 
-        // Phase 5-8: Punctuation begins to turn to code/math
-        else if (nextGlobalPhase < 9) {
+        } else if (nextGlobalPhase < 9) {
             if (orig.includes(',')) node.innerText = orig.replace(',', ' |');
             else if (orig.includes('.')) node.innerText = orig.replace('.', ' ///');
             else node.innerText = orig;
         } 
-        // Phase 9-11: Total structural collapse into blocks and errors
         else {
             if (orig === ' ') node.innerText = Math.random() > 0.7 ? ' _ ' : ' ';
             else if (orig.includes(',')) node.innerText = ' [ERR] ';
@@ -682,24 +648,17 @@
       }
     });
     
-    // 1. Setup the continuous reading loop that runs WHILE mutations happen
-    let isMutating = true;
+    globalIsMutating = true;
     const continuousReading = async () => {
-      while (isMutating) {
+      while (globalIsMutating) {
         let currentStoryString = getStoryText();
-        await speakRealisticCloudVoice(currentStoryString, nextGlobalPhase);
-        
-        // Take a 1-second breath between loops, but only if we are still mutating
-        if (isMutating) {
-            await sleep(1000); 
-        }
+        await speakRealisticCloudVoice(currentStoryString, nextGlobalPhase, true);
+        if (globalIsMutating) await sleep(1000); 
       }
     };
     
-    // Kick it off (do not await it here, so it runs parallel to the visual loop)
     let readingLoopPromise = continuousReading();
     
-    // 2. Visually mutate the words one by one
     for (let i = 0; i < children.length; i++) {
       const el = children[i];
       
@@ -721,7 +680,7 @@
           
           const currentMeta = getWordMetadata(currentWord);
           node.innerText = `[RECALLING: ${currentWord}]\nSENSORY: ${currentMeta.sensory}\nEMOTION: ${currentMeta.emotion}\nCLARITY: ${currentMeta.clarity}`;
-          await sleep(400); 
+          await sleep(200); 
 
           node.innerText = `[SEARCHING MEMORY...]`;
           
@@ -736,7 +695,6 @@
             circle.style.color = (tempLen % 2 === 0) ? '#fff' : '#000';
             node.innerText = `[FEELING: ${temp.w}]\nSENSORY: ${tempMeta.sensory}\nEMOTION: ${tempMeta.emotion}`;
             
-            // Stutter choppy robot local voice on the flashes (now with timeout safety)
             await speakChoppyGlitch(temp.w);
           }
 
@@ -754,15 +712,13 @@
           circle.innerText = wordLength;
 
           textSpan.classList.add('fade-out');
-          await sleep(300); 
+          await sleep(200); 
           
           el.dataset.phase = nextPhase;
           el.classList.add('morphed');
 
-          // --- NEW: TOTAL ABSTRACTION AT LATE STAGES ---
           let displayWord = newData.w;
           if (nextGlobalPhase >= 10 && Math.random() > 0.6) {
-              // 40% chance in the final phases to turn a word into a solid blackout block
               displayWord = "██████".substring(0, Math.max(3, wordLength)); 
           }
 
@@ -776,7 +732,7 @@
           }
           
           textSpan.innerText = displayWord;
-          el.dataset.currentWord = displayWord; // keep track of what's displayed
+          el.dataset.currentWord = displayWord; 
           textSpan.classList.remove('fade-out');
           
           await sleep(400); 
@@ -785,18 +741,15 @@
       }
     }
 
-    // 3. Stop the continuous reading loop and wait for it to finish its current sentence
-    isMutating = false;
+    globalIsMutating = false;
     await readingLoopPromise;
 
     document.body.style.backgroundColor = currentPalette.c1;
     document.body.style.color = currentPalette.c2;
 
-    // 4. Now isolate the audio and read the completely NEW, morphed story one last time
     let finalStoryString = getStoryText();
-    await speakRealisticCloudVoice(finalStoryString, nextGlobalPhase);
+    await speakRealisticCloudVoice(finalStoryString, nextGlobalPhase, false);
 
-    // 5. Schedule the next timeline shift
     setTimeout(morphStory, 4000);
   }
 
